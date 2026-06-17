@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Галерея Вкусов — Игра для персонала</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#FAF6F0;color:#333;min-height:100vh;padding:16px}
+.wrap{max-width:560px;margin:0 auto}
+h1{font-size:22px;font-weight:600;color:#7A2A2A;text-align:center;margin-bottom:4px}
+.subtitle{font-size:13px;color:#888;text-align:center;margin-bottom:20px}
+.screen{display:none}
+.screen.active{display:block}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.stat{background:#fff;border-radius:10px;padding:10px;text-align:center;border:1px solid #EDE0D4}
+.stat-val{font-size:20px;font-weight:600;color:#3D1F1F}
+.stat-lbl{font-size:10px;color:#999;margin-top:2px}
+.mode-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#999;margin-bottom:10px}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.mode-card{background:#fff;border:1px solid #EDE0D4;border-radius:12px;padding:16px;cursor:pointer;transition:border-color .15s,box-shadow .15s;text-align:left}
+.mode-card:hover{border-color:#B8860B;box-shadow:0 2px 8px rgba(184,134,11,.12)}
+.mode-card.expert{border-color:#7A2A2A;background:#FFF8F5}
+.mode-card.expert:hover{border-color:#5c1f1f;box-shadow:0 2px 8px rgba(122,42,42,.15)}
+.mode-icon{font-size:22px;margin-bottom:8px}
+.mode-title{font-size:14px;font-weight:600;color:#3D1F1F;margin-bottom:4px}
+.mode-desc{font-size:12px;color:#888;line-height:1.5}
+.diff-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:8px;margin-bottom:6px;font-weight:600}
+.diff-easy{background:#E8F5E9;color:#2E7D32}
+.diff-hard{background:#FCEBEB;color:#7A2A2A}
+.q-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.q-back{background:none;border:1px solid #ddd;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;color:#666}
+.q-back:hover{background:#f5f5f5}
+.q-progress{flex:1;height:5px;background:#EDE0D4;border-radius:3px}
+.q-bar{height:5px;background:#7A2A2A;border-radius:3px;transition:width .3s}
+.q-count{font-size:12px;color:#999;white-space:nowrap}
+.streak-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;background:#FAEEDA;color:#633806;border:1px solid #EF9F27;margin-bottom:12px}
+.diff-indicator{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:8px;margin-bottom:10px;font-weight:600}
+.di-easy{background:#E8F5E9;color:#2E7D32}
+.di-hard{background:#FCEBEB;color:#7A2A2A}
+.question-box{background:#fff;border:1px solid #EDE0D4;border-radius:12px;padding:18px;margin-bottom:14px}
+.q-cat{font-size:11px;font-weight:600;color:#7A2A2A;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.q-text{font-size:15px;font-weight:500;color:#222;line-height:1.5}
+.options{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.opt{background:#fff;border:1px solid #ddd;border-radius:10px;padding:13px 16px;cursor:pointer;font-size:13px;color:#333;transition:background .1s,border-color .1s;text-align:left;width:100%}
+.opt:hover:not(:disabled){background:#FBF5EF;border-color:#B8860B}
+.opt.correct{background:#EAF3DE;border-color:#3B6D11;color:#1a4a08;font-weight:500}
+.opt.wrong{background:#FCEBEB;border-color:#A32D2D;color:#5c1010}
+.opt:disabled{cursor:default}
+.feedback{border-radius:10px;padding:14px 16px;font-size:13px;line-height:1.65;margin-bottom:14px}
+.feedback.ok{background:#EAF3DE;color:#1a4a08;border:1px solid #3B6D11}
+.feedback.fail{background:#FCEBEB;color:#5c1010;border:1px solid #A32D2D}
+.fb-title{font-weight:600;margin-bottom:5px;font-size:14px}
+.btn{width:100%;padding:13px;font-size:14px;font-weight:500;border-radius:10px;cursor:pointer;border:1px solid #ddd;background:#fff;color:#333;transition:background .1s}
+.btn:hover{background:#f5f5f5}
+.btn.primary{background:#7A2A2A;border-color:#7A2A2A;color:#FAF6F0}
+.btn.primary:hover{background:#5c1f1f}
+.btn-row{display:flex;gap:8px}
+.btn-row .btn{flex:1}
+.result-emoji{font-size:52px;text-align:center;margin:16px 0 8px}
+.result-title{font-size:22px;font-weight:600;text-align:center;color:#3D1F1F;margin-bottom:6px}
+.result-sub{font-size:13px;color:#888;text-align:center;margin-bottom:20px;line-height:1.5}
+.leaders-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #EDE0D4}
+.lr-num{font-size:12px;font-weight:600;color:#bbb;min-width:18px}
+.lr-info{flex:1}
+.lr-mode{font-size:13px;font-weight:500;color:#222}
+.lr-meta{font-size:11px;color:#aaa;margin-top:1px}
+.lr-score{font-size:16px;font-weight:600}
+.empty-msg{font-size:13px;color:#bbb;text-align:center;padding:32px 0}
+hr{border:none;border-top:1px solid #EDE0D4;margin:16px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🍷 Галерея Вкусов</h1>
+<div class="subtitle">Игра для персонала — учи меню играя</div>
+
+<div id="home" class="screen active">
+  <div class="stat-row">
+    <div class="stat"><div class="stat-val" id="hs-total">0</div><div class="stat-lbl">Игр</div></div>
+    <div class="stat"><div class="stat-val" id="hs-best">—</div><div class="stat-lbl">Рекорд</div></div>
+    <div class="stat"><div class="stat-val" id="hs-streak">0</div><div class="stat-lbl">Серия</div></div>
+    <div class="stat"><div class="stat-val" id="hs-acc">—</div><div class="stat-lbl">Точность</div></div>
+  </div>
+  <div class="mode-label">Базовый уровень</div>
+  <div class="mode-grid">
+    <div class="mode-card" onclick="startGame('menu')">
+      <div class="diff-badge diff-easy">Новичок</div>
+      <div class="mode-icon">🍽</div>
+      <div class="mode-title">Знаток меню</div>
+      <div class="mode-desc">Состав блюд, цены, разделы меню</div>
+    </div>
+    <div class="mode-card" onclick="startGame('wine')">
+      <div class="diff-badge diff-easy">Новичок</div>
+      <div class="mode-icon">🍷</div>
+      <div class="mode-title">Сомелье</div>
+      <div class="mode-desc">Какое вино к какому блюду</div>
+    </div>
+    <div class="mode-card" onclick="startGame('story')">
+      <div class="diff-badge diff-easy">Новичок</div>
+      <div class="mode-icon">📖</div>
+      <div class="mode-title">Истории вин</div>
+      <div class="mode-desc">Факты о винах — для разговора с гостями</div>
+    </div>
+    <div class="mode-card" onclick="startGame('mix')">
+      <div class="diff-badge diff-easy">Новичок</div>
+      <div class="mode-icon">⚡</div>
+      <div class="mode-title">Микс — всё сразу</div>
+      <div class="mode-desc">Случайные вопросы из всех режимов</div>
+    </div>
+  </div>
+  <div class="mode-label">Уровень эксперта 🔥</div>
+  <div class="mode-grid">
+    <div class="mode-card expert" onclick="startGame('expert_wine')">
+      <div class="diff-badge diff-hard">Эксперт</div>
+      <div class="mode-icon">🎯</div>
+      <div class="mode-title">Сомелье — Эксперт</div>
+      <div class="mode-desc">Все варианты правдоподобны. Без подсказок</div>
+    </div>
+    <div class="mode-card expert" onclick="startGame('expert_mix')">
+      <div class="diff-badge diff-hard">Эксперт</div>
+      <div class="mode-icon">💀</div>
+      <div class="mode-title">Хардкор — всё вместе</div>
+      <div class="mode-desc">Перевёртыши, ловушки, точные детали</div>
+    </div>
+  </div>
+  <button class="btn" onclick="showLeaders()">Таблица рекордов</button>
+</div>
+
+<div id="game" class="screen">
+  <div class="q-header">
+    <button class="q-back" onclick="goHome()">← Выйти</button>
+    <div class="q-progress"><div class="q-bar" id="qbar"></div></div>
+    <div class="q-count" id="qcount">1 / 10</div>
+  </div>
+  <div id="streak-row" style="display:none"><div class="streak-badge">🔥 <span id="streak-txt"></span></div></div>
+  <div id="diff-row" style="display:none"></div>
+  <div class="question-box">
+    <div class="q-cat" id="q-cat"></div>
+    <div class="q-text" id="q-text"></div>
+  </div>
+  <div class="options" id="opts"></div>
+  <div id="feedback" style="display:none"></div>
+  <div id="action-row" style="display:none">
+    <button class="btn primary" id="next-btn" onclick="nextQ()">Следующий вопрос →</button>
+  </div>
+</div>
+
+<div id="result" class="screen">
+  <div class="result-emoji" id="res-emoji"></div>
+  <div class="result-title" id="res-title"></div>
+  <div class="result-sub" id="res-sub"></div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-val" id="r-score"></div><div class="stat-lbl">Правильно</div></div>
+    <div class="stat"><div class="stat-val" id="r-acc"></div><div class="stat-lbl">Точность</div></div>
+    <div class="stat"><div class="stat-val" id="r-streak"></div><div class="stat-lbl">Лучшая серия</div></div>
+    <div class="stat"><div class="stat-val" id="r-time"></div><div class="stat-lbl">Время</div></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn primary" id="replay-btn" onclick="replayGame()">Ещё раз</button>
+    <button class="btn" onclick="goHome()">На главную</button>
+  </div>
+</div>
+
+<div id="leaders" class="screen">
+  <button class="q-back" style="margin-bottom:16px" onclick="goHome()">← Назад</button>
+  <div class="mode-label">Таблица рекордов</div>
+  <div id="leaders-list"></div>
+</div>
+</div>
+
+<script>
+const QS={
+menu:[
+{cat:"Закуски",q:"Какое блюдо — «нежная телятина с соусом из тунца и каперсами»?",opts:["Карпаччо из говядины","Вителло тонато","Тартар из говядины","Брускетта с лососем"],ans:1,fact:"Вителло тонато — классика Пьемонта. «Vitello» — телятина, «tonnato» — с тунцом. Подаётся холодным с каперсами и соусом на основе тунца."},
+{cat:"Закуски",q:"Сколько стоит Тартар из говядины?",opts:["850 ₸","920 ₸","960 ₸","990 ₸"],ans:2,fact:"Тартар из говядины — 960 ₸, 150 г. Уточняйте у гостя предпочтения по соусам."},
+{cat:"Закуски",q:"Что входит в брускетту со слабосолёным лососем?",opts:["Лосось и каперсы","Лосось и авокадо","Лосось и страчателла","Лосось и руккола"],ans:1,fact:"225 г, 990 ₸. Свежее сочетание с кремовой текстурой авокадо."},
+{cat:"Супы",q:"Что такое буррата?",opts:["Твёрдый сыр с зернистой текстурой","Мягкий сыр с кремом внутри","Маринованный вяленый томат","Вид итальянской яичной пасты"],ans:1,fact:"Burrata = «маслянистая». Снаружи моцарелла, внутри — сливочная страчателла."},
+{cat:"Супы",q:"Какой суп стоит дороже всего?",opts:["Куриный бульон","Суп из томатов","Большой рыбный суп","Суп-пюре из батата"],ans:2,fact:"Рыбный суп — 340 г, 1 300 ₸. Самый дорогой суп в меню."},
+{cat:"Пицца",q:"Какая пицца самая дорогая?",opts:["С королевскими креветками","С пармской ветчиной","Пицца Фирменная","Четыре сыра"],ans:2,fact:"Пицца Фирменная — 550 г, 1 600 ₸. Самое дорогое из пицц."},
+{cat:"Ризотто",q:"Сколько видов ризотто в меню?",opts:["2","3","4","5"],ans:1,fact:"С грибами (1290), с креветками (1100), с грушей и горгонзолой (990)."},
+{cat:"Паста",q:"Какая паста с лососем в меню?",opts:["Паппарделле с лососем и каперсами","Фузилли с лососем и шпинатом","Казаречче с лососем и базиликом","Равиоли с лососем и рикоттой"],ans:1,fact:"Фузилли с лососем и шпинатом — 350 г, 1 300 ₸."},
+{cat:"Основные",q:"Какое основное блюдо самое дорогое?",opts:["Стейк из лосося","Палтус с пюре","Стейк стриплойн","Паппарделле с креветками"],ans:2,fact:"Стейк стриплойн — 370 г, 2 900 ₸. Самое дорогое блюдо в меню."},
+{cat:"Десерты",q:"Что необычного в брауни?",opts:["В нём белый трюфель","Он с пармезаном","С крупной морской солью","Полностью без сахара"],ans:1,fact:"90 г, 580 ₸. Солёный пармезан усиливает шоколад — контраст сладкого и солёного."},
+{cat:"Закуски",q:"Что такое вителло тонато?",opts:["Жареная телятина с грибами","Холодная телятина с соусом тунца","Карпаччо из говядины с трюфелем","Тартар из телятины с каперсами"],ans:1,fact:"Классика Пьемонта: телятина варится и подаётся холодной с кремовым соусом из тунца, каперсов и анчоусов."},
+{cat:"Пицца",q:"В какой пицце есть халапеньо?",opts:["Маргарита с моцареллой","С пепперони и халапеньо","Фирменная с морепродуктами","С грибами и ветчиной"],ans:1,fact:"Пицца с пепперони и халапеньо — 445 г, 1 200 ₸. Предупреждайте гостей об остроте."},
+{cat:"Десерты",q:"Сколько стоит сорбет?",opts:["450 ₸","500 ₸","550 ₸","600 ₸"],ans:2,fact:"Сорбет в ассортименте — 100 г, 550 ₸. Уточните актуальные вкусы у кухни."},
+{cat:"Паста",q:"Что такое казаречче?",opts:["Широкая плоская паста","Короткая скрученная паста","Трубчатая паста рифлёная","Тонкая длинная паста"],ans:1,fact:"Казаречче — короткая сицилийская паста с двойным скручиванием. Отлично держит густые мясные соусы."},
+{cat:"Салаты",q:"В каком салате есть горгонзола?",opts:["Тартар из тунца и авокадо","Цезарь с курицей","Салат из руколы с грушей","Томаты с бурратой"],ans:2,fact:"Салат из руколы, груши и горгонзолы с греческим орехом — 255 г, 980 ₸."},
+],
+
+wine:[
+{cat:"Вино к блюду",q:"К Карпаччо из говядины — рекомендация сомелье?",opts:["Bruni Prosecco Extra Dry","Vino Nobile di Montepulciano","Paddle Creek Sauvignon","Tenacity Barossa Shiraz"],ans:1,fact:"Vino Nobile — тосканский Санджовезе с сухой вишнёвой кислотностью. Режет жирность говядины и подчёркивает умами пармезана."},
+{cat:"Вино к блюду",q:"К Большому рыбному супу с морепродуктами?",opts:["Barolo Simposio","Chablis Sainte Claire","Luigi Bosca Malbec","Côtes du Rhône Rouge"],ans:1,fact:"Chablis — минеральное бургундское вино с йодистой свежестью. Его почвы из ракушек юрского периода создают «морской» характер — идеал к морепродуктам."},
+{cat:"Вино к блюду",q:"К Стейку стриплойн — главная рекомендация?",opts:["Sauvignon Blanc","Gavi dei Gavi","Barolo Simposio","Le Rose Regaleali"],ans:2,fact:"Barolo — «Король вин». Мощные танины буквально «жуют» говяжий жир. Стейк за 2 900 ₸ заслуживает вина с характером."},
+{cat:"Вино к блюду",q:"К Ризотто с лесными грибами?",opts:["Chablis Sainte Claire","Barolo Simposio","Bruni Prosecco Rosé","Chenin Blanc"],ans:1,fact:"Barolo из Пьемонта к пьемонтскому ризотто с грибами — региональная классика. Трюфельные ноты вина рифмуются с грибами."},
+{cat:"Вино к блюду",q:"К Пицце с пепперони и халапеньо?",opts:["Riesling Mosel (Германия)","Bruni Prosecco Rosé Brut","Tenacity Barossa Shiraz","Gavi dei Gavi (Пьемонт)"],ans:2,fact:"Австралийский Шираз к острой пицце — мощное тёмное вино с перечными нотками усиливает остроту, но и укрощает её насыщенностью."},
+{cat:"Вино к блюду",q:"К Спагетти карбонара — лучшая пара?",opts:["Tenacity Shiraz","Gavi dei Gavi","Barolo","Côtes du Rhône"],ans:1,fact:"Gavi dei Gavi — деликатный белый из Пьемонта. Кислотность режет жирность яичного соуса и гуанчале. Идеальный итальянский баланс."},
+{cat:"Вино к блюду",q:"К Болоньезе — классическая итальянская пара?",opts:["Chablis","Paddle Creek Sauvignon","Chianti Classico","Bruni Prosecco"],ans:2,fact:"Кьянти Классико и болоньезе — одна из самых известных пар. Соседние регионы, родственные вкусы: кислотность Санджовезе режет жир мяса."},
+{cat:"Вино к блюду",q:"К Тирамису — что рекомендует сомелье?",opts:["Barolo","Bruni Asti","Tenacity Shiraz","Chablis"],ans:1,fact:"Bruni Asti — венецианская традиция к тирамису. Мускатная сладость и мягкие пузырьки идеально подходят к кофейному и сливочному десерту."},
+{cat:"Вино к блюду",q:"К Ризотто с грушей и горгонзолой?",opts:["Barolo Simposio","Luigi Bosca Malbec","Riesling Mosel","Côtes du Rhône Rouge"],ans:2,fact:"Рислинг и голубой сыр — один из великих союзов в мире вина. Кислотность балансирует горгонзолу, грушевые нотки вина рифмуются с грушей в блюде."},
+{cat:"Принцип",q:"Почему к рыбным блюдам рекомендуют Chablis?",opts:["Французские вина исторически лучшие к рыбе","Высокий алкоголь усиливает морской вкус","Минеральность от почв из морских ракушек","Наиболее доступное вино во всей карте"],ans:2,fact:"Шабли растёт на кимериджском известняке — дне юрского моря. Эта «морская» минеральность в вине идеально перекликается с морепродуктами."},
+{cat:"Принцип",q:"Почему Кьянти хорошо к томатным соусам?",opts:["Оба тосканского происхождения — земляки","Схожая кислотность: Санджовезе и томат","Красное вино всегда к красному соусу","Просто устоявшаяся кулинарная традиция"],ans:1,fact:"Кислотность Санджовезе схожа с кислотностью томата. Похожие по природе вещества не конкурируют, а дополняют — это основной принцип гастрономических пар."},
+{cat:"Принцип",q:"Гость любит красное, но заказал лосося. Что предложить?",opts:["Barolo Simposio (Пьемонт)","Pinot Noir Ried Fabian (Австрия)","Luigi Bosca Malbec (Мендоса)","Tenacity Barossa Shiraz (ЮАвстралия)"],ans:1,fact:"Австрийский Пино Нуар — деликатное красное, которое работает с рыбой. Лёгкие танины и красноягодная свежесть не перебивают лосось."},
+{cat:"Принцип",q:"Брускетта со страчателлой и абрикосовым джемом — что выбрать?",opts:["Barolo Simposio (Пьемонт)","Bruni Prosecco Rosé Brut","Chablis Sainte Claire (Бургундия)","Tenacity Barossa Shiraz (Австралия)"],ans:1,fact:"Розовое Просекко: фруктовость отзывается на абрикосовый джем, пузырьки режут жирность страчателлы."},
+{cat:"Принцип",q:"К Палтусу с пюре из сельдерея — лучший выбор?",opts:["Barolo","Riesling Mosel","Gavi dei Gavi","Tenacity Shiraz"],ans:2,fact:"Gavi dei Gavi — нежный белый из Пьемонта. Цветочность и миндальная горчинка не перебивают деликатного палтуса."},
+],
+
+story:[
+{cat:"История",q:"Как появился Amarone?",opts:["Имя основателя знаменитого хозяйства","Монах забыл бочку — вино выбродило досуха","Название средневековой деревни в Венето","По-итальянски означает «великолепное»"],ans:1,fact:"1936 год. Recioto выбродил досуха. Монах попробовал — воскликнул «Это горькое!» — amaro по-итальянски."},
+{cat:"История",q:"Откуда морской вкус в Chablis?",opts:["Добавляют морскую соль при выдержке","Виноградники у Атлантического океана","Почвы из ракушек юрского периода","Субъективное восприятие дегустаторов"],ans:2,fact:"100 млн лет назад здесь было море. Остался кимериджский известняк из ракушек аммонитов. «Морская ДНК» почвы переходит в вино."},
+{cat:"История",q:"За что Barolo называют «вином королей»?",opts:["Исторически самое дорогое в Италии","Производили исключительно для савойского двора","Рецепт был разработан при королевском дворе","Рубиновый цвет символизирует королевскую кровь"],ans:1,fact:"Карл Альберт выписал французского энолога Удара, чтобы сделать Неббиоло сухим — прежде оно было сладким и мутным."},
+{cat:"История",q:"Что такое Ripasso?",opts:["Многолетняя выдержка в дубовых бочках","Повторная ферментация на выжимках Amarone","Название исторической деревни в Венето","Редкий автохтонный сорт региона Венето"],ans:1,fact:"Ri-passo = повторный проход. Молодое вино обретает глубину Amarone за меньшие деньги."},
+{cat:"История",q:"Откуда знак Gallo Nero на бутылках Chianti?",opts:["Изображён на средневековом гербе Флоренции","Граница с Сиеной: флорентийский петух проснулся раньше","Традиционный символ старинного итальянского виноделия","Тёмно-чёрный цвет зрелых ягод Санджовезе"],ans:1,fact:"Спор Флоренции и Сиены о границе решили: всадники стартовали на рассвете по петуху. Флорентийский проснулся раньше — больше объехали."},
+{cat:"История",q:"Как Pinotage стал «найдёнышем»?",opts:["Нашли дикорастущим в южноафриканском лесу","Профессор скрестил сорта, забыл — нашли под сорняками","Ввезли нелегально через контрабандные каналы","Происхождение до сих пор остаётся неизвестным"],ans:1,fact:"1925 год. Перольд скрестил Пино Нуар и Синсо из любопытства. Забыл. Нашли через годы под сорняками. Единственный сорт из ЮАР."},
+{cat:"История",q:"Как Malbec стал «аргентинским вином»?",opts:["Сорт был создан аргентинскими виноделами","Во Франции второстепенный — в Мендосе расцвёл в горах","Аргентина производит свыше 80% мирового Мальбека","Производится и экспортируется только из Аргентины"],ans:1,fact:"1853 год. Привезли черенки в Мендосу. Высокогорье (800–1200 м) и солнце Анд преобразили сорт. Luigi Bosca делает его с 1901 года."},
+{cat:"История",q:"Что такое «Ried» в Pinot Noir Ried Fabian?",opts:["Австрийское обозначение конкретного сорта винограда","Классифицированный одиночный виноградник — аналог Grand Cru","Имя исторического основателя этого знаменитого хозяйства","Особый фирменный метод и тип выдержки вина в бочке"],ans:1,fact:"«Ried» в Австрии — классифицированный одиночный виноградник высшего класса, как Grand Cru во Франции. Знак терруарности и качества."},
+{cat:"История",q:"Почему Вердехо называют «иллюзионистом»?",opts:["Это вино кардинально меняет цвет при контакте с воздухом","Считался исчезнувшим 500 лет — монахи сохранили тайно","Вкус этого сорта совершенно непредсказуемо меняется каждый год","По вкусу абсолютно неотличим от классического Совиньон Блана"],ans:1,fact:"После арабского завоевания Вердехо считался исчезнувшим. Монахи тайно хранили лозы «для причастия». В 1970-х нашли — сорт возродился."},
+{cat:"История",q:"Как Шенен Блан попал в ЮАР?",opts:["Исконный и исторически коренной сорт Южной Африки","Привезли первые поселенцы у Мыса Доброй Надежды в 1655 году","Французские виноделы продали черенки в XIX веке","Случайно завезли вместе с грузовыми поставками из Европы"],ans:1,fact:"1655 год. Первые поселенцы у Мыса Доброй Надежды. Во Франции он капризен — ЮАР его преобразила. Сегодня ЮАР выращивает 18% мирового Шенена."},
+{cat:"История",q:"Как называются почвы, на которых растёт Chablis?",opts:["Вулканические базальтовые породы","Кимериджский морской известняк","Рейнский голубой сланец","Крупный бордоский гравий"],ans:1,fact:"Кимериджский известняк — дно юрского моря. Состоит из окаменевших ракушек аммонитов. Именно эта почва даёт Шабли его уникальную минеральность."},
+{cat:"История",q:"Что такое Extra Dry у Просекко? Почему это звучит парадоксально?",opts:["Самый сухой стиль игристого — без сахара","Слаще Brut: в XIX веке сладкое считалось нормой","Маркетинговый приём начала XX века","Ошибочный перевод термина с французского"],ans:1,fact:"В XIX веке нормой были очень сладкие вина. То, что казалось «экстра сухим» тогда — сегодня воспринимается как мягкое и лёгкое. Название осталось как историческая традиция."},
+],
+
+expert_wine:[
+{cat:"Эксперт: Сомелье",q:"Гость заказал Ризотто с лесными грибами. Вы рекомендуете Barolo. Он спрашивает: «Почему не Chianti?» — ваш ответ?",opts:["Оба из Пьемонта — региональность, плюс трюфельные ноты Бароло рифмуются с грибами","Кьянти слишком лёгкое и тонкое, не выдержит плотного пьемонтского ризотто","Кьянти по устоявшейся традиции принято подавать исключительно к мясу","Бароло стоит значительно дороже Кьянти — следовательно, оно лучше"],ans:0,fact:"Правильный аргумент: региональное единство (оба из Пьемонта) + трюфельные ноты Бароло из Неббиоло рифмуются с грибным вкусом ризотто. Кьянти тоже работало бы, но Бароло — идеал.",hard:true},
+{cat:"Эксперт: Сомелье",q:"К Вителло тонато гость просит белое вино. Какие ДВА варианта из карты одинаково хороши?",opts:["Gavi dei Gavi и Ilusionista Verdejo Rueda","Chablis Sainte Claire и Barolo Simposio","Riesling Mosel и Tenacity Barossa Shiraz","Bruni Prosecco и Luigi Bosca Malbec"],ans:0,fact:"Gavi dei Gavi — земляк блюда (Пьемонт), деликатный, не перебьёт нежный соус. Verdejo — его горьковатая нотка интересно контрастирует с умами каперсов. Оба белых, оба работают.",hard:true},
+{cat:"Эксперт: Сомелье",q:"Гость говорит: «Я хочу к лососю что-то необычное, не Шабли». Что предложите?",opts:["Bruni Asti — десертный характер точно удивит гостя","Шардоне Gran Reserva — сливочный, богатый стиль к рыбе","Barolo — мощное тёмное красное, это точно будет необычно","Tenacity Shiraz — перечный и тёмный, никто не ожидает"],ans:1,fact:"Шардоне Gran Reserva — правильная нестандартная альтернатива: сливочность и ваниль дают другой, но гармоничный стиль к рыбе. Asti — десертное. Barolo и Shiraz — слишком тяжёлые для лосося.",hard:true},
+{cat:"Эксперт: Сомелье",q:"Что лишнее? Выбери вино, которое НЕ подходит к Спагетти карбонара.",opts:["Gavi dei Gavi","Crémant d'Alsace Extra Brut","Barolo Simposio","Chablis Sainte Claire"],ans:2,fact:"Barolo — мощное, танинное, с ароматом дёгтя и розы. Его сила перебьёт нежный яичный соус карбонары. Gavi, Кремант и Шабли — все с кислотностью, которая режет жирность блюда.",hard:true},
+{cat:"Эксперт: Сомелье",q:"Гость заказал сырное ассорти. Среди сыров — мягкий бри, выдержанный пармезан и горгонзола. Какую стратегию вы предложите?",opts:["Одно Barolo — универсально к любому сыру","Riesling к мягким/голубым, Barolo к твёрдым","Только игристое — оно освежает между сырами","Шардоне Gran Reserva — подходит ко всем"],ans:1,fact:"Профессиональный подход: Riesling к мягким и голубым сырам (кислотность балансирует жирность), Barolo к выдержанным твёрдым (танины + жир = идеал). Два вина раскрывают ассорти полностью.",hard:true},
+{cat:"Эксперт: Сомелье",q:"Из карты вин выбери вино с самой высокой кислотностью — оно лучше всего подойдёт к жирным блюдам.",opts:["Luigi Bosca Malbec (Аргентина, Мендоса)","Bruni Asti Spumante (Пьемонт, Италия)","Chablis Sainte Claire (Бургундия, Франция)","Domini Veneti Amarone (Венето, Италия)"],ans:2,fact:"Chablis — из Шардоне на известняке Бургундии, знаменит экстремальной кислотностью. Именно она режет жирность. Malbec и Amarone — высокий алкоголь, мало кислоты. Asti — сладкое, кислотность низкая.",hard:true},
+{cat:"Эксперт: Сомелье",q:"Гость-итальянец слышит, что вы рекомендуете Chianti к болоньезе. Он спрашивает: «Почему Classico, а не обычное Chianti?» — ваш ответ?",opts:["Classico всегда дороже обычного — значит лучше по качеству","Classico из исторического ядра: строже стандарты, больше выдержка","Classico производится из отдельного автохтонного сорта","Чисто маркетинговое различие без реальной разницы в вине"],ans:1,fact:"Chianti Classico производится только в историческом ядре апеллясьона: строже требования к урожайности, минимум 80% Санджовезе, выдержка не менее 12 месяцев. Глубже, структурнее обычного Кьянти.",hard:true},
+{cat:"Эксперт: Сомелье",q:"К Паппарделле с королевскими креветками гость просит красное. Что выбрать из карты — и почему именно это?",opts:["Barolo — самое престижное и выдержанное в карте","Pinot Noir Ried Fabian — деликатные танины к морепродуктам","Tenacity Shiraz — мощная структура подчеркнёт пасту","Côtes du Rhône — провансальский характер к итальянскому"],ans:1,fact:"Pinot Noir — единственное красное, которое работает с морепродуктами: деликатные танины, свежесть, ягодная лёгкость. Shiraz и Barolo — слишком мощные, перебьют креветки. Рон — хуже Пино к морскому.",hard:true},
+{cat:"Эксперт: Сомелье",q:"Что такое «Ripasso» и почему оно дороже обычного Valpolicella, но дешевле Amarone?",opts:["Торговая марка хозяйства Bertani","Повторная ферментация на выжимках Amarone","Выдержка в новых французских дубовых бочках","Производится из других сортов, чем Valpolicella"],ans:1,fact:"Ri-passo = повторный проход. Молодое Valpolicella ферментируется на выжимках после Amarone — обретает его изюмность и насыщенность. Дороже Valpolicella простого, дешевле Amarone — отличное соотношение.",hard:true},
+{cat:"Эксперт: Сомелье",q:"Гость хочет вино к Малиновой сакуре и говорит: «Только не сладкое». Что предложите?",opts:["Bruni Asti — игристое с десертным характером","Розе «Красная Горка» — сухое, малиновые тона к десерту","Barolo — сухое красное, точно не сладкое","Chablis Sainte Claire — сухое белое к ягодам"],ans:1,fact:"Розе «Красная Горка» — сухое розовое с малиновой ягодностью. Визуально и вкусово рифмуется с десертом, но без лишней сладости. Barolo слишком тяжёлый. Chablis — несовместим с малиной.",hard:true},
+{cat:"Эксперт: Сомелье",q:"Гость спрашивает: «Чем отличается Prosecco от Cava?» — коротко и по делу.",opts:["Отличаются только страной происхождения: Италия vs Испания","Просекко — резервуарный метод (фруктово), Кава — бутылочный (тостово)","Принципиальное различие: Просекко сухое, Кава сладкая","Разные сорта: Просекко из Шардоне, Кава из Темпранильо"],ans:1,fact:"Ключевое: метод производства. Просекко — вторая ферментация в резервуаре (метод Шарма): быстро, фруктово, доступно. Кава — в бутылке как Шампань: дольше, тостовые/ореховые ноты, сложнее. Gran Reserva Cava выдерживается 30+ месяцев.",hard:true},
+{cat:"Эксперт: Сомелье",q:"Что лишнее в этой группе? Gavi dei Gavi / Soave Classico / Barolo Simposio / Chablis Sainte Claire",opts:["Gavi dei Gavi — оно из Пьемонта, остальные из других регионов","Barolo Simposio — это красное, остальные три белые","Chablis — французское, остальные итальянские","Soave — венецианское, остальные из Пьемонта"],ans:1,fact:"Barolo — единственное красное вино в этом списке. Gavi, Soave и Chablis — все белые. Простой, но важный вопрос на знание карты вин.",hard:true},
+{cat:"Эксперт: Детали",q:"Сколько месяцев минимум выдерживается Barolo по закону?",opts:["12 месяцев","24 месяца","36 месяцев","48 месяцев"],ans:2,fact:"Barolo выдерживается минимум 36 месяцев (из них не менее 18 в дубовых бочках). Barolo Riserva — 62 месяца. Именно поэтому это вино такое сложное и дорогое.",hard:true},
+{cat:"Эксперт: Детали",q:"Из какого сорта винограда делают Barolo?",opts:["Санджовезе","Неббиоло","Монтепульчано","Корвина"],ans:1,fact:"Barolo делают исключительно из Неббиоло — капризного сорта, который растёт только в Пьемонте. Санджовезе — это Кьянти. Монтепульчано — Вино Нобиле. Корвина — Вальполичелла и Амароне.",hard:true},
+{cat:"Эксперт: Детали",q:"Из каких сортов делают Amarone della Valpolicella?",opts:["Производится исключительно из одного сорта Корвина","Корвина, Корвиноне и Рондинелла — виноград подвяливают","Традиционный купаж: Неббиоло и Санджовезе Гроссо","Классический белый купаж: Мальвазия и Треббьяно"],ans:1,fact:"Классический купаж Амароне: Корвина (45–95%), Корвинone и Рондинелла. Виноград подвяливается 3–4 месяца на соломенных матах — теряет воду, концентрирует сахар, потом медленно бродит в сухое вино.",hard:true},
+{cat:"Эксперт: Детали",q:"Что значит «Brut Nature» у Cava Sumarroca Gran Reserva?",opts:["Органическое производство без химикатов","Нулевой досаж: сахар не добавляется совсем","Природная вторичная газация без CO2","Выдержка только в натуральных дубовых бочках"],ans:1,fact:"Dosage — это добавка сахарного сиропа после удаления осадка. «Brut Nature» = 0 г/л сахара, это максимально сухой стиль. Brut — до 12 г/л. Extra Dry — 12–17 г/л. Именно поэтому Brut Nature такое жёсткое и минеральное.",hard:true},
+{cat:"Эксперт: Детали",q:"В чём разница между Chianti и Chianti Classico?",opts:["Абсолютно одно и то же вино с разными этикетками","Classico из исторического ядра: строже нормы, 80%+ Санджовезе","Classico производят исключительно из Каберне Совиньона","Classico обязательно выдерживается в новых французских бочках"],ans:1,fact:"Chianti — большой апеллясьон в Тоскане. Chianti Classico — исторически первая зона производства, 71 500 га между Флоренцией и Сиеной. Строже: мин. 80% Санджовезе, мин. 12 мес. выдержки, знак Gallo Nero.",hard:true},
+],
+};
+
+QS.mix=[...QS.menu,...QS.wine,...QS.story];
+QS.expert_mix=[...QS.expert_wine,...QS.story.map(q=>({...q,hard:true})),...QS.menu.filter((_,i)=>i%3===0).map(q=>({...q,hard:true}))];
+
+const TITLES={menu:"Знаток меню",wine:"Сомелье",story:"Истории вин",mix:"Микс",expert_wine:"Сомелье — Эксперт",expert_mix:"Хардкор"};
+const EMOJIS={menu:"🍽",wine:"🍷",story:"📖",mix:"⚡",expert_wine:"🎯",expert_mix:"💀"};
+
+let st={mode:'',questions:[],idx:0,score:0,streak:0,bestStreak:0,answered:false,startTime:0,totalGames:0,totalRight:0,totalQ:0,winStreak:0,bestScore:0};
+
+function shuffle(a){return a.sort(()=>Math.random()-.5)}
+
+function startGame(mode){
+  let pool=[...QS[mode]];shuffle(pool);
+  st.questions=pool.slice(0,10);st.mode=mode;st.idx=0;st.score=0;st.streak=0;st.bestStreak=0;st.answered=false;st.startTime=Date.now();
+  show('game');renderQ();
+}
+function replayGame(){startGame(st.mode)}
+
+function renderQ(){
+  const q=st.questions[st.idx],total=st.questions.length;
+  document.getElementById('qbar').style.width=Math.round(st.idx/total*100)+'%';
+  document.getElementById('qcount').textContent=(st.idx+1)+' / '+total;
+  document.getElementById('q-cat').textContent=q.cat;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('feedback').style.display='none';
+  document.getElementById('action-row').style.display='none';
+
+  const sr=document.getElementById('streak-row');
+  if(st.streak>=2){sr.style.display='block';document.getElementById('streak-txt').textContent='Серия '+st.streak+'! Не останавливайся';}else{sr.style.display='none';}
+
+  const dr=document.getElementById('diff-row');
+  if(q.hard){dr.style.display='block';dr.innerHTML='<div class="diff-indicator di-hard">🔥 Вопрос эксперта</div>';}
+  else{dr.style.display='none';}
+
+  const opts=document.getElementById('opts');
+  const items=q.opts.map((o,i)=>({o,i}));
+  opts.innerHTML='';
+  items.forEach(({o,i})=>{
+    const btn=document.createElement('button');
+    btn.className='opt';btn.textContent=o;btn.dataset.idx=i;
+    btn.onclick=()=>answer(i);opts.appendChild(btn);
+  });
+  st.answered=false;
+}
+
+function answer(chosen){
+  if(st.answered)return;st.answered=true;
+  const q=st.questions[st.idx],correct=chosen===q.ans;
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.disabled=true;
+    const bi=parseInt(b.dataset.idx);
+    if(bi===q.ans)b.classList.add('correct');
+    else if(bi===chosen&&!correct)b.classList.add('wrong');
+  });
+  if(correct){st.score++;st.streak++;st.totalRight++;if(st.streak>st.bestStreak)st.bestStreak=st.streak;}
+  else{st.streak=0;}
+  st.totalQ++;
+  const fb=document.getElementById('feedback');
+  fb.style.display='block';fb.className='feedback '+(correct?'ok':'fail');
+  fb.innerHTML='<div class="fb-title">'+(correct?'Верно!':'Не совсем')+'</div>'+q.fact;
+  document.getElementById('action-row').style.display='block';
+  document.getElementById('next-btn').textContent=st.idx+1<st.questions.length?'Следующий вопрос →':'Посмотреть результат →';
+}
+
+function nextQ(){
+  st.idx++;if(st.idx>=st.questions.length){showResult();return;}renderQ();
+}
+
+function showResult(){
+  st.totalGames++;
+  if(st.score>st.bestScore)st.bestScore=st.score;
+  if(st.score===st.questions.length)st.winStreak++;else st.winStreak=0;
+  updateStats();
+  const pct=Math.round(st.score/st.questions.length*100);
+  const elapsed=Math.round((Date.now()-st.startTime)/1000);
+  const mins=Math.floor(elapsed/60),secs=elapsed%60;
+  const timeStr=mins>0?mins+' мин '+secs+' сек':secs+' сек';
+  const isExpert=st.mode.startsWith('expert');
+  let emoji,title,sub;
+  if(isExpert){
+    if(pct===100){emoji='🏆';title='Идеальный сомелье!';sub='10 из 10 на экспертном уровне. Серьёзно впечатляет.';}
+    else if(pct>=80){emoji='🎯';title='Эксперт!';sub='Отличный результат на сложном уровне. Почти идеал.';}
+    else if(pct>=60){emoji='💪';title='Хорошая база!';sub='Для эксперта нормально. Повтори то, что не получилось.';}
+    else if(pct>=40){emoji='📚';title='Продолжай!';sub='Эксперт — это сложно. Вернись к базовым режимам.';}
+    else{emoji='🍷';title='Честная попытка';sub='Экспертный уровень требует глубоких знаний. Не сдавайся!';}
+  } else {
+    if(pct===100){emoji='🏆';title='Идеально!';sub='Все 10 из 10. Ты готов работать в зале!';}
+    else if(pct>=80){emoji='🌟';title='Отличный результат!';sub='Почти профессионал. Попробуй уровень Эксперта!';}
+    else if(pct>=60){emoji='👍';title='Неплохо!';sub='Хорошая база. Повтори то, что не получилось.';}
+    else if(pct>=40){emoji='📚';title='Продолжай учиться!';sub='Меню большое — это нормально. Играй чаще.';}
+    else{emoji='🍷';title='Начинающий гурман';sub='Не расстраивайся — с каждой игрой лучше!';}
+  }
+  document.getElementById('res-emoji').textContent=emoji;
+  document.getElementById('res-title').textContent=title;
+  document.getElementById('res-sub').textContent=sub;
+  document.getElementById('r-score').textContent=st.score+' / '+st.questions.length;
+  document.getElementById('r-acc').textContent=pct+'%';
+  document.getElementById('r-streak').textContent=st.bestStreak;
+  document.getElementById('r-time').textContent=timeStr;
+  document.getElementById('replay-btn').textContent=EMOJIS[st.mode]+' Ещё раз';
+  saveRecord(pct,timeStr);show('result');
+}
+
+function saveRecord(pct,timeStr){
+  try{const k='gv_recs';const recs=JSON.parse(localStorage.getItem(k)||'[]');recs.unshift({mode:TITLES[st.mode],score:st.score+'/'+st.questions.length,pct,time:timeStr,date:new Date().toLocaleDateString('ru')});localStorage.setItem(k,JSON.stringify(recs.slice(0,20)));}catch(e){}
+}
+
+function showLeaders(){
+  let recs=[];try{recs=JSON.parse(localStorage.getItem('gv_recs')||'[]');}catch(e){}
+  const list=document.getElementById('leaders-list');
+  if(!recs.length){list.innerHTML='<div class="empty-msg">Пока нет результатов. Сыграй первую игру!</div>';}
+  else{list.innerHTML=recs.map((r,i)=>`<div class="leaders-row"><div class="lr-num">${i+1}</div><div class="lr-info"><div class="lr-mode">${r.mode}</div><div class="lr-meta">${r.date} · ${r.time}</div></div><div class="lr-score" style="color:${r.pct>=80?'#1a4a08':r.pct>=60?'#633806':'#5c1010'}">${r.score}</div></div>`).join('');}
+  show('leaders');
+}
+
+function updateStats(){
+  document.getElementById('hs-total').textContent=st.totalGames;
+  document.getElementById('hs-best').textContent=st.bestScore>0?st.bestScore+'/10':'—';
+  document.getElementById('hs-streak').textContent=st.winStreak;
+  document.getElementById('hs-acc').textContent=st.totalQ>0?Math.round(st.totalRight/st.totalQ*100)+'%':'—';
+}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goHome(){show('home');updateStats();}
+</script>
+</body>
+</html>
