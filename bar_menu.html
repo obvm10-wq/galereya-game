@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Барное меню — Галерея Вкусов</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FAF6F0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #2c2c2a;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  .nav {
+    background: #fff;
+    border-bottom: 1px solid #EDE0D4;
+    padding: 12px 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .nav a {
+    text-decoration: none;
+    color: #5F5E5A;
+    font-size: 14px;
+    padding: 6px 14px;
+    border: 1px solid #EDE0D4;
+    border-radius: 20px;
+    background: #FAF6F0;
+    transition: all 0.2s;
+  }
+  .nav a:hover { background: #EDE0D4; color: #2c2c2a; }
+  .nav-active {
+    background: #7A2A2A !important;
+    color: #fff !important;
+    border-color: #7A2A2A !important;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #3E1A1A 0%, #7A2A2A 60%, #9E4A4A 100%);
+    color: #fff;
+    padding: 56px 24px 48px;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 20px;
+    font-size: 12px;
+    padding: 4px 16px;
+    margin-bottom: 18px;
+    letter-spacing: 0.5px;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .hero p {
+    font-size: 16px;
+    opacity: 0.82;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.65;
+  }
+
+  /* SECTIONS */
+  .sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 40px 32px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .section-card {
+    background: #fff;
+    border: 1px solid #EDE0D4;
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .section-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.10);
+  }
+
+  .section-top {
+    padding: 32px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .section-emoji {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+  .section-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    letter-spacing: 0.3px;
+  }
+  .badge-cocktail { background: #F3E8EE; color: #7A2A2A; }
+  .badge-lemonade { background: #E8F5E9; color: #2E7D32; }
+
+  .section-card h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+  .section-card p {
+    font-size: 14px;
+    color: #5F5E5A;
+    line-height: 1.65;
+    margin-bottom: 20px;
+  }
+
+  .section-items {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 0;
+  }
+  .section-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #444441;
+  }
+  .item-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-cocktail { background: #7A2A2A; }
+  .dot-lemon { background: #2E7D32; }
+
+  .section-footer {
+    margin-top: auto;
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #EDE0D4;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .footer-cocktail { color: #7A2A2A; }
+  .footer-lemon { color: #2E7D32; }
+  .footer-arrow { font-size: 18px; }
+
+  /* ОБЩИЕ ПРАВИЛА */
+  .rules {
+    background: #fff;
+    border: 1px solid #EDE0D4;
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin: 0 32px 40px;
+    max-width: 796px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .rules h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #444441;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .rule-item {
+    background: #FAF6F0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .rule-icon { font-size: 24px; margin-bottom: 6px; }
+  .rule-text { font-size: 12px; color: #5F5E5A; line-height: 1.5; }
+  .rule-text strong { display: block; color: #2c2c2a; font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+
+  /* FOOTER */
+  .page-footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 13px;
+    color: #888780;
+    border-top: 1px solid #EDE0D4;
+  }
+
+  @media (max-width: 600px) {
+    .sections { grid-template-columns: 1fr; padding: 24px 16px; gap: 16px; }
+    .rules { margin: 0 16px 32px; }
+    .rules-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Навигация">
+  <a href="index.html">🎮 Игра</a>
+  <a href="wine_list_stories.html">🍷 Вина</a>
+  <a href="bar_menu.html" class="nav-active">🍸 Барное меню</a>
+</nav>
+
+<div class="hero">
+  <span class="hero-badge">🍸 Бар · Галерея Вкусов</span>
+  <h1>Барное меню</h1>
+  <p>Авторские коктейли и свежие лимонады ручного приготовления. Два направления — один характер.</p>
+</div>
+
+<div class="sections">
+
+  <!-- КОКТЕЙЛИ -->
+  <a class="section-card" href="drinks.html">
+    <div class="section-top">
+      <span class="section-emoji">🍹</span>
+      <span class="section-badge badge-cocktail">Алкогольные</span>
+      <h2>Коктейли</h2>
+      <p>Авторские миксы на основе рома, водки, текилы, виски и джина. Со шторис и составом.</p>
+      <div class="section-items">
+        <div class="section-item"><span class="item-dot dot-cocktail"></span>Полный состав с граммовкой</div>
+        <div class="section-item"><span class="item-dot dot-cocktail"></span>История каждого коктейля</div>
+        <div class="section-item"><span class="item-dot dot-cocktail"></span>Метод приготовления и гарниш</div>
+        <div class="section-item"><span class="item-dot dot-cocktail"></span>Фильтры по основе</div>
+      </div>
+    </div>
+    <div class="section-footer footer-cocktail">
+      Открыть карту коктейлей
+      <span class="footer-arrow">→</span>
+    </div>
+  </a>
+
+  <!-- ЛИМОНАДЫ -->
+  <a class="section-card" href="lemonades2026.html">
+    <div class="section-top">
+      <span class="section-emoji">🍋</span>
+      <span class="section-badge badge-lemonade">Новинка · Лето 2026</span>
+      <h2>Лимонады</h2>
+      <p>Линейка авторских безалкогольных напитков. Домашние кордиалы, свежие пюре, натуральные специи.</p>
+      <div class="section-items">
+        <div class="section-item"><span class="item-dot dot-lemon"></span>Маракуйя — Корица</div>
+        <div class="section-item"><span class="item-dot dot-lemon"></span>Малина — Лемонграсс</div>
+        <div class="section-item"><span class="item-dot dot-lemon"></span>Вишня — Ореховая трава</div>
+        <div class="section-item"><span class="item-dot dot-lemon"></span>Черника — Ваниль</div>
+        <div class="section-item"><span class="item-dot dot-lemon"></span>Базилик — Огурец</div>
+      </div>
+    </div>
+    <div class="section-footer footer-lemon">
+      Открыть карту лимонадов
+      <span class="footer-arrow">→</span>
+    </div>
+  </a>
+
+</div>
+
+<!-- ОБЩИЕ ПРАВИЛА ПОДАЧИ -->
+<div class="rules">
+  <h3>🎋 Стандарты подачи бара</h3>
+  <div class="rules-grid">
+    <div class="rule-item">
+      <div class="rule-icon">🥃</div>
+      <div class="rule-text"><strong>Бокал</strong>Хайбол для лимонадов, тип бокала по карте для коктейлей</div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon">🧊</div>
+      <div class="rule-text"><strong>Лёд</strong>Кубиковый лёд. Всегда в достаточном количестве</div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon">🎋</div>
+      <div class="rule-text"><strong>Гарниш</strong>Лист бамбука для лимонадов. Гарниш по карте для коктейлей</div>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  🍸 Галерея Вкусов · Барное меню · Лето 2026
+</footer>
+
+</body>
+</html>
