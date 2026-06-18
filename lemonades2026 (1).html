@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Лимонады 2026 — Галерея Вкусов</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FAF6F0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #2c2c2a;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  .nav {
+    background: #fff;
+    border-bottom: 1px solid #EDE0D4;
+    padding: 12px 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .nav a {
+    text-decoration: none;
+    color: #5F5E5A;
+    font-size: 14px;
+    padding: 6px 14px;
+    border: 1px solid #EDE0D4;
+    border-radius: 20px;
+    background: #FAF6F0;
+    transition: all 0.2s;
+  }
+  .nav a:hover { background: #EDE0D4; color: #2c2c2a; }
+  .nav-active {
+    background: #2E7D32 !important;
+    color: #fff !important;
+    border-color: #2E7D32 !important;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+    color: #fff;
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 20px;
+    font-size: 12px;
+    padding: 4px 14px;
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+  }
+  .hero h1 {
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+  }
+  .hero p {
+    font-size: 15px;
+    opacity: 0.85;
+    max-width: 500px;
+    margin: 0 auto 20px;
+    line-height: 1.6;
+  }
+  .hero-meta {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    font-size: 13px;
+    opacity: 0.8;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* FILTER */
+  .filter-bar {
+    padding: 20px 24px 8px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-label { font-size: 13px; color: #888780; margin-right: 4px; }
+  .filter-btn {
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    background: #fff;
+    color: #5F5E5A;
+    border: 1px solid #EDE0D4;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: #2E7D32; color: #2E7D32; }
+  .filter-btn.active { background: #2E7D32; color: #fff; border-color: #2E7D32; }
+
+  /* CARDS */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 16px 24px 40px;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid #EDE0D4;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+
+  .card-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid #EDE0D4;
+  }
+  .card-emoji { font-size: 36px; margin-bottom: 10px; display: block; }
+  .card-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .tag-fruit { background: #FFF3E0; color: #E65100; }
+  .tag-berry { background: #FCE4EC; color: #AD1457; }
+  .tag-herb { background: #E8F5E9; color: #2E7D32; }
+  .tag-spice { background: #FBE9E7; color: #BF360C; }
+  .tag-desert { background: #F3E5F5; color: #6A1B9A; }
+  .tag-apertif { background: #E3F2FD; color: #1565C0; }
+
+  .card h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c2c2a;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .card-taste {
+    font-size: 14px;
+    color: #5F5E5A;
+    line-height: 1.6;
+  }
+
+  .card-body { padding: 16px 20px; }
+
+  /* Состав */
+  .ingredients-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #888780;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .ingredients {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .ingredient {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #444441;
+  }
+  .ingredient-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #2E7D32;
+    flex-shrink: 0;
+  }
+
+  /* Подача */
+  .serve-box {
+    background: #F1F8E9;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+  }
+  .serve-box p { font-size: 13px; color: #33691E; line-height: 1.5; }
+
+  /* Рекомендация */
+  .recommend-box {
+    background: #FFF8E1;
+    border-left: 3px solid #F9A825;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+  }
+  .recommend-label { font-size: 11px; font-weight: 600; color: #F57F17; margin-bottom: 4px; }
+  .recommend-box p { font-size: 13px; color: #5F5E5A; line-height: 1.5; }
+
+  /* Expand toggle */
+  .card-toggle {
+    width: 100%;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #2E7D32;
+    font-weight: 500;
+    border-top: 1px solid #EDE0D4;
+  }
+  .card-toggle:hover { background: #F1F8E9; }
+  .toggle-arrow { transition: transform 0.3s; font-size: 16px; }
+  .toggle-arrow.open { transform: rotate(180deg); }
+  .card-detail { display: none; }
+  .card-detail.open { display: block; }
+
+  /* Метод */
+  .method-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #E8F5E9;
+    color: #2E7D32;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 13px;
+    color: #888780;
+    border-top: 1px solid #EDE0D4;
+  }
+
+  /* Count */
+  .count-badge {
+    background: #E8F5E9;
+    color: #2E7D32;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 10px;
+    margin-left: 8px;
+  }
+
+  /* Search */
+  .search-wrap { padding: 8px 24px 0; }
+  .search-input {
+    width: 100%;
+    max-width: 380px;
+    padding: 10px 16px;
+    border: 1px solid #EDE0D4;
+    border-radius: 24px;
+    font-size: 14px;
+    background: #fff;
+    outline: none;
+    color: #2c2c2a;
+  }
+  .search-input:focus { border-color: #2E7D32; }
+  .search-input::placeholder { color: #B4B2A9; }
+
+  /* Empty */
+  .empty { text-align: center; padding: 60px 20px; color: #888780; grid-column: 1/-1; }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 24px; }
+    .cards { grid-template-columns: 1fr; padding: 12px 16px 32px; }
+    .filter-bar, .search-wrap { padding-left: 16px; padding-right: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Навигация">
+  <a href="index.html">🎮 Игра</a>
+  <a href="wine_list_stories.html">🍷 Вина</a>
+  <a href="bar_menu.html">🍸 Барное меню</a>
+  <a href="lemonades2026.html" class="nav-active">🍋 Лимонады</a>
+</nav>
+
+<div class="hero">
+  <span class="hero-badge">☀️ Лето 2026 · Новинка</span>
+  <h1>Авторские лимонады</h1>
+  <p>Линейка безалкогольных напитков ручного приготовления. Метод билд, бокал хайбол, лёд, лист бамбука.</p>
+  <div class="hero-meta">
+    <span>🌿 5 авторских рецептов</span>
+    <span>🧊 Метод Билд</span>
+    <span>🎋 Лист бамбука</span>
+  </div>
+</div>
+
+<div class="search-wrap">
+  <input class="search-input" type="text" id="searchInput" placeholder="Поиск по названию или вкусу..." oninput="filterCards()" />
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Фильтр:</span>
+  <button class="filter-btn active" onclick="setFilter('all', this)">Все <span class="count-badge" id="count-all">5</span></button>
+  <button class="filter-btn" onclick="setFilter('fruit', this)">🍑 Фрукты</button>
+  <button class="filter-btn" onclick="setFilter('berry', this)">🍒 Ягоды</button>
+  <button class="filter-btn" onclick="setFilter('herb', this)">🌿 Травы</button>
+  <button class="filter-btn" onclick="setFilter('apertif', this)">🍃 Аперитив</button>
+  <button class="filter-btn" onclick="setFilter('desert', this)">🍨 К десерту</button>
+</div>
+
+<main class="cards" id="cardsGrid">
+
+  <!-- 1. Маракуйя-Корица -->
+  <article class="card" data-tags="fruit spice" data-text="маракуйя корица экзотика пряный">
+    <div class="card-header">
+      <span class="card-emoji">🌴</span>
+      <div class="card-tags">
+        <span class="tag tag-fruit">Тропик</span>
+        <span class="tag tag-spice">Пряный</span>
+      </div>
+      <h2>Маракуйя — Корица</h2>
+      <p class="card-taste">Яркий, экзотический вкус. Интенсивная кислинка спелой маракуйи, сбалансированная пряными нотами натуральной корицы. Приятное пряное послевкусие.</p>
+    </div>
+    <button class="card-toggle" onclick="toggleCard(this)" aria-expanded="false">
+      Состав и подача <span class="toggle-arrow">▾</span>
+    </button>
+    <div class="card-detail card-body">
+      <span class="method-badge">⚡ Метод: Билд</span>
+      <p class="ingredients-title">Состав</p>
+      <div class="ingredients">
+        <div class="ingredient"><span class="ingredient-dot"></span>Пюре маракуйи</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Домашний сироп из палочек натуральной корицы</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Содовая</div>
+      </div>
+      <div class="serve-box">
+        <p>🥃 <strong>Бокал:</strong> Хайбол &nbsp;·&nbsp; 🧊 Кубиковый лёд &nbsp;·&nbsp; 🎋 Лист бамбука</p>
+      </div>
+      <div class="recommend-box">
+        <p class="recommend-label">👤 Кому предложить</p>
+        <p>Любителям яркой экзотики и тем, кто ищет что-то более интересное и пряное, чем классические сладкие лимонады.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- 2. Малина-Лемонграсс -->
+  <article class="card" data-tags="berry herb" data-text="малина лемонграсс ягодный нежный цитрус">
+    <div class="card-header">
+      <span class="card-emoji">🍓</span>
+      <div class="card-tags">
+        <span class="tag tag-berry">Ягодный</span>
+        <span class="tag tag-herb">Травяной</span>
+      </div>
+      <h2>Малина — Лемонграсс</h2>
+      <p class="card-taste">Нежный ягодный лимонад с выразительным цитрусово-травянистым оттенком. Свежесть лемонграсса с нотками лимонной цедры. Кристально чистый вкус.</p>
+    </div>
+    <button class="card-toggle" onclick="toggleCard(this)" aria-expanded="false">
+      Состав и подача <span class="toggle-arrow">▾</span>
+    </button>
+    <div class="card-detail card-body">
+      <span class="method-badge">⚡ Метод: Билд</span>
+      <p class="ingredients-title">Состав</p>
+      <div class="ingredients">
+        <div class="ingredient"><span class="ingredient-dot"></span>Пюре малины</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Натуральный сироп лемонграсса</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Свежевыжатый сок лимона</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Содовая</div>
+      </div>
+      <div class="serve-box">
+        <p>🥃 <strong>Бокал:</strong> Хайбол &nbsp;·&nbsp; 🧊 Кубиковый лёд &nbsp;·&nbsp; 🎋 Лист бамбука</p>
+      </div>
+      <div class="recommend-box">
+        <p class="recommend-label">👤 Кому предложить</p>
+        <p>Любителям ягодных, умеренно сладких напитков с приятной парфюмерной цитрусовой свежестью.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- 3. Вишня-Ореховая трава -->
+  <article class="card" data-tags="berry spice" data-text="вишня ореховая трава пажитник глубокий терпкий мясо паста">
+    <div class="card-header">
+      <span class="card-emoji">🍒</span>
+      <div class="card-tags">
+        <span class="tag tag-berry">Ягодный</span>
+        <span class="tag tag-spice">Гастрономический</span>
+      </div>
+      <h2>Вишня — Ореховая трава</h2>
+      <p class="card-taste">Глубокий, благородный вкус. Насыщенная вишня с бархатистой кислинкой, раскрывающейся нотами пажитника и грецкого ореха. Изысканный шлейф.</p>
+    </div>
+    <button class="card-toggle" onclick="toggleCard(this)" aria-expanded="false">
+      Состав и подача <span class="toggle-arrow">▾</span>
+    </button>
+    <div class="card-detail card-body">
+      <span class="method-badge">⚡ Метод: Билд</span>
+      <p class="ingredients-title">Состав</p>
+      <div class="ingredients">
+        <div class="ingredient"><span class="ingredient-dot"></span>Домашний вишнёвый кордиал</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Ореховая трава (пажитник)</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Сок лимона</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Содовая</div>
+      </div>
+      <div class="serve-box">
+        <p>🥃 <strong>Бокал:</strong> Хайбол &nbsp;·&nbsp; 🧊 Кубиковый лёд &nbsp;·&nbsp; 🎋 Лист бамбука</p>
+      </div>
+      <div class="recommend-box">
+        <p class="recommend-label">👤 Кому предложить</p>
+        <p>Гостям, любящим глубокие терпкие вкусы и необычные гастрономические сочетания. Прекрасная пара к мясным блюдам и пасте.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- 4. Черника-Ваниль -->
+  <article class="card" data-tags="berry desert" data-text="черника ваниль мягкий десертный сорбет дети">
+    <div class="card-header">
+      <span class="card-emoji">🫐</span>
+      <div class="card-tags">
+        <span class="tag tag-berry">Ягодный</span>
+        <span class="tag tag-desert">К десерту</span>
+      </div>
+      <h2>Черника — Ваниль</h2>
+      <p class="card-taste">Мягкий, обволакивающий, десертный. Лесная черника с изысканными нотами натуральной стручковой ванили. Напоминает итальянский премиальный сорбет.</p>
+    </div>
+    <button class="card-toggle" onclick="toggleCard(this)" aria-expanded="false">
+      Состав и подача <span class="toggle-arrow">▾</span>
+    </button>
+    <div class="card-detail card-body">
+      <span class="method-badge">⚡ Метод: Билд</span>
+      <p class="ingredients-title">Состав</p>
+      <div class="ingredients">
+        <div class="ingredient"><span class="ingredient-dot"></span>Домашний черничный кордиал</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Натуральные стручки ванили</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Лимонный сок</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Содовая</div>
+      </div>
+      <div class="serve-box">
+        <p>🥃 <strong>Бокал:</strong> Хайбол &nbsp;·&nbsp; 🧊 Кубиковый лёд &nbsp;·&nbsp; 🎋 Лист бамбука</p>
+      </div>
+      <div class="recommend-box">
+        <p class="recommend-label">👤 Кому предложить</p>
+        <p>Как лёгкое завершение трапезы или альтернатива десерту — подходит и детям, и взрослым.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- 5. Базилик-Огурец -->
+  <article class="card" data-tags="herb apertif" data-text="базилик огурец свежий итальянский аперитив зелень">
+    <div class="card-header">
+      <span class="card-emoji">🌿</span>
+      <div class="card-tags">
+        <span class="tag tag-herb">Травяной</span>
+        <span class="tag tag-apertif">Аперитив</span>
+      </div>
+      <h2>Базилик — Огурец</h2>
+      <p class="card-taste">Максимально свежий, тонизирующий, истинно итальянский. Аромат зелёного и фиолетового базилика, прохлада огурца, бодрящая кислинка лимона. Чистый, супер-освежающий вкус.</p>
+    </div>
+    <button class="card-toggle" onclick="toggleCard(this)" aria-expanded="false">
+      Состав и подача <span class="toggle-arrow">▾</span>
+    </button>
+    <div class="card-detail card-body">
+      <span class="method-badge">⚡ Метод: Билд</span>
+      <p class="ingredients-title">Состав</p>
+      <div class="ingredients">
+        <div class="ingredient"><span class="ingredient-dot"></span>Домашний кордиал из зелёного и фиолетового базилика</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Протёртый свежий огурец</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Сок лимона</div>
+        <div class="ingredient"><span class="ingredient-dot"></span>Содовая</div>
+      </div>
+      <div class="serve-box">
+        <p>🥃 <strong>Бокал:</strong> Хайбол &nbsp;·&nbsp; 🧊 Кубиковый лёд &nbsp;·&nbsp; 🎋 Лист бамбука</p>
+      </div>
+      <div class="recommend-box">
+        <p class="recommend-label">👤 Кому предложить</p>
+        <p>Идеален как аперитив. Гостям, которые предпочитают свежесть и средиземноморский стиль — не любят сладкое.</p>
+      </div>
+    </div>
+  </article>
+
+</main>
+
+<footer class="footer">
+  🍋 Галерея Вкусов · Линейка лимонадов Лето 2026 · Все напитки готовятся методом Билд
+</footer>
+
+<script>
+  let currentFilter = 'all';
+
+  function toggleCard(btn) {
+    const detail = btn.nextElementSibling;
+    const arrow = btn.querySelector('.toggle-arrow');
+    const isOpen = detail.classList.contains('open');
+    detail.classList.toggle('open', !isOpen);
+    arrow.classList.toggle('open', !isOpen);
+    btn.setAttribute('aria-expanded', !isOpen);
+  }
+
+  function setFilter(filter, el) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    filterCards();
+  }
+
+  function filterCards() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+    let visible = 0;
+
+    cards.forEach(card => {
+      const tags = card.dataset.tags || '';
+      const text = (card.dataset.text || '') + card.innerText.toLowerCase();
+      const matchFilter = currentFilter === 'all' || tags.includes(currentFilter);
+      const matchSearch = !query || text.includes(query);
+
+      const show = matchFilter && matchSearch;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    document.getElementById('count-all').textContent = visible;
+
+    let empty = document.getElementById('emptyState');
+    if (visible === 0) {
+      if (!empty) {
+        empty = document.createElement('div');
+        empty.id = 'emptyState';
+        empty.className = 'empty';
+        empty.innerHTML = '<div class="empty-icon">🔍</div><p>Ничего не найдено. Попробуйте другой запрос.</p>';
+        document.getElementById('cardsGrid').appendChild(empty);
+      }
+    } else if (empty) {
+      empty.remove();
+    }
+  }
+</script>
+</body>
+</html>
