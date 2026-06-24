@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Галерея Вкусов — Игра для персонала</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#FAF6F0;color:#333;min-height:100vh;padding:16px}
+.wrap{max-width:600px;margin:0 auto}
+h1{font-size:22px;font-weight:600;color:#7A2A2A;text-align:center;margin-bottom:4px}
+.subtitle{font-size:13px;color:#888;text-align:center;margin-bottom:18px}
+.screen{display:none}.screen.active{display:block}
+
+/* NAV */
+.nav-bar{display:flex;gap:7px;margin-bottom:18px;flex-wrap:wrap}
+.nav-btn{flex:1;padding:9px 6px;font-size:12px;font-weight:500;border:1px solid #EDE0D4;border-radius:10px;background:#fff;color:#888;cursor:pointer;text-align:center;text-decoration:none;display:block;transition:all .15s;min-width:70px}
+.nav-btn:hover{background:#F5EDE8;border-color:#B8860B;color:#7A2A2A}
+.nav-btn.cur{background:#7A2A2A;border-color:#7A2A2A;color:#FAF6F0;pointer-events:none}
+
+/* STATS */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}
+.stat{background:#fff;border-radius:10px;padding:10px;text-align:center;border:1px solid #EDE0D4}
+.stat-val{font-size:20px;font-weight:600;color:#3D1F1F}
+.stat-lbl{font-size:10px;color:#999;margin-top:2px}
+
+/* MODE CARDS */
+.sec-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#aaa;margin-bottom:8px}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.mode-card{background:#fff;border:1px solid #EDE0D4;border-radius:12px;padding:14px;cursor:pointer;transition:border-color .15s,box-shadow .15s;text-align:left}
+.mode-card:hover{border-color:#B8860B;box-shadow:0 2px 8px rgba(184,134,11,.1)}
+.mode-card.expert{border-color:#EDE0D4;background:#FFF8F5}
+.mode-card.expert:hover{border-color:#7A2A2A}
+.diff-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:8px;margin-bottom:6px;font-weight:600}
+.db-easy{background:#FAEEDA;color:#633806}
+.db-hard{background:#FAECE7;color:#993C1D}
+.db-new{background:#E8F5E9;color:#2E7D32}
+.mode-icon{font-size:22px;margin-bottom:6px}
+.mode-title{font-size:13px;font-weight:600;color:#3D1F1F;margin-bottom:3px}
+.mode-desc{font-size:11px;color:#888;line-height:1.5}
+.btn{width:100%;padding:12px;font-size:13px;font-weight:500;border-radius:10px;cursor:pointer;border:1px solid #EDE0D4;background:#fff;color:#333;transition:background .1s;margin-top:4px}
+.btn:hover{background:#F5EDE8}
+.btn.primary{background:#7A2A2A;border-color:#7A2A2A;color:#FAF6F0}
+.btn.primary:hover{background:#5c1f1f}
+.btn-row{display:flex;gap:8px;margin-top:4px}
+.btn-row .btn{flex:1}
+
+/* GAME */
+.q-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.q-back{background:#fff;border:1px solid #EDE0D4;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;color:#666;white-space:nowrap}
+.q-back:hover{background:#F5EDE8}
+.q-progress{flex:1;height:5px;background:#EDE0D4;border-radius:3px}
+.q-bar{height:5px;background:#7A2A2A;border-radius:3px;transition:width .3s}
+.q-count{font-size:12px;color:#999;white-space:nowrap}
+.streak-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;background:#FAEEDA;color:#633806;border:1px solid #EDE0D4;margin-bottom:10px}
+.diff-ind{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:8px;margin-bottom:10px;font-weight:600;background:#FAECE7;color:#993C1D}
+.new-ind{background:#E8F5E9;color:#2E7D32}
+.question-box{background:#fff;border:1px solid #EDE0D4;border-radius:12px;padding:16px;margin-bottom:12px}
+.q-cat{font-size:10px;font-weight:600;color:#7A2A2A;letter-spacing:.07em;text-transform:uppercase;margin-bottom:7px}
+.q-text{font-size:14px;font-weight:500;color:#222;line-height:1.5}
+.options{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.opt{background:#fff;border:1px solid #EDE0D4;border-radius:10px;padding:12px 15px;cursor:pointer;font-size:13px;color:#333;transition:background .1s,border-color .1s;text-align:left;width:100%}
+.opt:hover:not(:disabled){background:#FBF5EF;border-color:#B8860B}
+.opt.correct{background:#EAF3DE;border-color:#3B6D11;color:#1a4a08;font-weight:500}
+.opt.wrong{background:#FAECE7;border-color:#993C1D;color:#5c1010}
+.opt:disabled{cursor:default}
+.feedback{border-radius:10px;padding:13px 15px;font-size:13px;line-height:1.65;margin-bottom:12px}
+.feedback.ok{background:#EAF3DE;color:#1a4a08;border:1px solid #3B6D11}
+.feedback.fail{background:#FAECE7;color:#5c1010;border:1px solid #993C1D}
+.fb-title{font-weight:600;margin-bottom:4px;font-size:14px}
+
+/* RESULT */
+.result-emoji{font-size:52px;text-align:center;margin:14px 0 7px}
+.result-title{font-size:22px;font-weight:600;text-align:center;color:#3D1F1F;margin-bottom:5px}
+.result-sub{font-size:13px;color:#888;text-align:center;margin-bottom:18px;line-height:1.5}
+
+/* LEADERS */
+.leaders-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #EDE0D4}
+.lr-num{font-size:12px;font-weight:600;color:#bbb;min-width:18px}
+.lr-info{flex:1}
+.lr-mode{font-size:13px;font-weight:500;color:#222}
+.lr-meta{font-size:11px;color:#aaa;margin-top:1px}
+.lr-score{font-size:16px;font-weight:600}
+.empty-msg{font-size:13px;color:#bbb;text-align:center;padding:28px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🍷 Галерея Вкусов</h1>
+<div class="subtitle">Игра для персонала — учи меню играя</div>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="nav-bar">
+    <a class="nav-btn cur" href="index.html">🎮 Игра</a>
+    <a class="nav-btn" href="menu.html">🍽 Меню</a>
+    <a class="nav-btn" href="wine_list_stories.html">🍷 Вина</a>
+    <a class="nav-btn" href="drinks.html">🍹 Коктейли</a>
+    <a class="nav-btn" href="lemonades2026.html">🍋 Лимонады</a>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-val" id="hs-total">0</div><div class="stat-lbl">Игр</div></div>
+    <div class="stat"><div class="stat-val" id="hs-best">—</div><div class="stat-lbl">Рекорд</div></div>
+    <div class="stat"><div class="stat-val" id="hs-streak">0</div><div class="stat-lbl">Серия</div></div>
+    <div class="stat"><div class="stat-val" id="hs-acc">—</div><div class="stat-lbl">Точность</div></div>
+  </div>
+
+  <div class="sec-label">Базовый уровень</div>
+  <div class="mode-grid">
+    <div class="mode-card" onclick="startGame('menu')">
+      <div class="diff-badge db-easy">Новичок</div>
+      <div class="mode-icon">🍽</div>
+      <div class="mode-title">Знаток меню</div>
+      <div class="mode-desc">Блюда, цены, состав, разделы</div>
+    </div>
+    <div class="mode-card" onclick="startGame('wine')">
+      <div class="diff-badge db-easy">Новичок</div>
+      <div class="mode-icon">🍷</div>
+      <div class="mode-title">Сомелье</div>
+      <div class="mode-desc">Вино к блюду — правильные пары</div>
+    </div>
+    <div class="mode-card" onclick="startGame('story')">
+      <div class="diff-badge db-easy">Новичок</div>
+      <div class="mode-icon">📖</div>
+      <div class="mode-title">Истории вин</div>
+      <div class="mode-desc">Факты для разговора с гостями</div>
+    </div>
+    <div class="mode-card" onclick="startGame('lemon')">
+      <div class="diff-badge db-new">Новинка 2026</div>
+      <div class="mode-icon">🍋</div>
+      <div class="mode-title">Лимонады</div>
+      <div class="mode-desc">Состав и особенности новых лимонадов</div>
+    </div>
+  </div>
+
+  <div class="sec-label">Продвинутый уровень</div>
+  <div class="mode-grid">
+    <div class="mode-card" onclick="startGame('mix')">
+      <div class="diff-badge db-easy">Средний</div>
+      <div class="mode-icon">⚡</div>
+      <div class="mode-title">Микс — всё сразу</div>
+      <div class="mode-desc">Вопросы из всех разделов вперемешку</div>
+    </div>
+    <div class="mode-card expert" onclick="startGame('expert_wine')">
+      <div class="diff-badge db-hard">Эксперт</div>
+      <div class="mode-icon">🎯</div>
+      <div class="mode-title">Сомелье — Эксперт</div>
+      <div class="mode-desc">Все варианты правдоподобны. Сложно</div>
+    </div>
+    <div class="mode-card expert" onclick="startGame('expert_menu')">
+      <div class="diff-badge db-hard">Эксперт</div>
+      <div class="mode-icon">🔪</div>
+      <div class="mode-title">Меню — Эксперт</div>
+      <div class="mode-desc">Точные цены, составы, детали</div>
+    </div>
+    <div class="mode-card expert" onclick="startGame('hardmix')">
+      <div class="diff-badge db-hard">Хардкор</div>
+      <div class="mode-icon">💀</div>
+      <div class="mode-title">Хардкор — всё</div>
+      <div class="mode-desc">Перевёртыши, ловушки, все темы</div>
+    </div>
+  </div>
+  <button class="btn" onclick="showLeaders()">Таблица рекордов</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+  <div class="q-header">
+    <button class="q-back" onclick="goHome()">← Выйти</button>
+    <div class="q-progress"><div class="q-bar" id="qbar"></div></div>
+    <div class="q-count" id="qcount">1 / 10</div>
+  </div>
+  <div id="streak-row" style="display:none"><div class="streak-badge">🔥 <span id="streak-txt"></span></div></div>
+  <div id="diff-row" style="display:none"></div>
+  <div class="question-box">
+    <div class="q-cat" id="q-cat"></div>
+    <div class="q-text" id="q-text"></div>
+  </div>
+  <div class="options" id="opts"></div>
+  <div id="feedback" style="display:none"></div>
+  <div id="action-row" style="display:none">
+    <button class="btn primary" id="next-btn" onclick="nextQ()">Следующий вопрос →</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="result-emoji" id="res-emoji"></div>
+  <div class="result-title" id="res-title"></div>
+  <div class="result-sub" id="res-sub"></div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-val" id="r-score"></div><div class="stat-lbl">Правильно</div></div>
+    <div class="stat"><div class="stat-val" id="r-acc"></div><div class="stat-lbl">Точность</div></div>
+    <div class="stat"><div class="stat-val" id="r-streak"></div><div class="stat-lbl">Серия</div></div>
+    <div class="stat"><div class="stat-val" id="r-time"></div><div class="stat-lbl">Время</div></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn primary" id="replay-btn" onclick="replayGame()">Ещё раз</button>
+    <button class="btn" onclick="goHome()">На главную</button>
+  </div>
+</div>
+
+<!-- LEADERS -->
+<div id="leaders" class="screen">
+  <button class="q-back" style="margin-bottom:14px" onclick="goHome()">← Назад</button>
+  <div class="sec-label">Таблица рекордов</div>
+  <div id="leaders-list"></div>
+</div>
+</div>
+
+<script>
+const QS={
+menu:[
+{cat:"Меню · Закуски",q:"Что такое Вителло тоннато?",opts:["Карпаччо из тунца с томатами","Холодная телятина с соусом из тунца и каперсами","Тартар из говядины с анчоусами","Брускетта с морепродуктами"],ans:1,fact:"Вителло тоннато — классика Пьемонта. Vitello = телятина, tonnato = с тунцом. Подаётся холодным. Гостям, которые смотрят скептически — предложи один кусочек. Отказавшихся не было."},
+{cat:"Меню · Закуски",q:"Из чего состоит крудо из лангустин?",opts:["Лангустины, авокадо, кинза, соус leche de tigre","Лангустины, томаты, руккола, бальзамик","Лангустины, каперсы, лимон, масло","Лангустины, страчателла, базилик"],ans:0,fact:"Leche de tigre — «тигровое молоко» — соус из лимонного сока и специй. 'Готовит' морепродукты без термообработки. Самая дорогая закуска в меню — 1800 ₸."},
+{cat:"Меню · Закуски",q:"Сколько стоит карпаччо из томатов?",opts:["950 ₸","850 ₸","750 ₸","650 ₸"],ans:2,fact:"Карпаччо из томатов — 750 ₸, самая доступная закуска. Розовые томаты, оливковое масло, крем бальзамик, красный лук. Выглядит дорого — стоит мало."},
+{cat:"Меню · Закуски",q:"Что входит в сырное ассорти?",opts:["Моцарелла, пармезан, рикотта, мёд","Камамбер, пармезан, Дор Блю, орехи, виноград","Бри, страчателла, горгонзола, фрукты","Маасдам, пармезан, чеддер, виноград"],ans:1,fact:"Три характера: камамбер — мягкий сливочный, пармезан — твёрдый зернистый, Дор Блю — голубой дерзкий. Медово-горчичный соус объединяет всех. Идеально к вину."},
+{cat:"Меню · Закуски",q:"Какая самая дорогая закуска?",opts:["Вителло тоннато — 1200 ₸","Тартар из говядины — 1200 ₸","Крудо из лангустин — 1800 ₸","Сырное ассорти — 1100 ₸"],ans:2,fact:"Крудо из лангустин — 1800 ₸. Лангустины из холодных вод Норвегии — слаще обычных креветок, нежнее омара. Самое дорогое = самое необычное."},
+{cat:"Меню · Салаты",q:"Что такое страчателла?",opts:["Вид итальянской пасты","Сыр из сердца буррата — нити в сливках","Соус на основе томатов","Вяленое мясо из Пармы"],ans:1,fact:"Страчателла — то, что внутри буррата. Нежные молочные нити в сливках. Burrata снаружи — оболочка из моцареллы, внутри — страчателла. Burrata = «маслянистая»."},
+{cat:"Меню · Салаты",q:"Какой самый дорогой салат?",opts:["Цезарь с курицей — 1400 ₸","Зелёный салат — 1400 ₸","Салат с уткой и персиком — 1600 ₸","Страчателла с томатами — 1200 ₸"],ans:2,fact:"Салат с уткой конфи, персиком и страчателлой — 1600 ₸. Утка конфи томится в собственном жире несколько часов. Трюфельный цитронет — аристократическая нотка."},
+{cat:"Меню · Супы",q:"Сколько стоит куриный бульон?",opts:["690 ₸","590 ₸","490 ₸","390 ₸"],ans:2,fact:"Куриный бульон — 490 ₸. Самый доступный суп. Варится несколько часов. В Италии «in brodo» — еда для восстановления сил. Хорош после алкоголя и для детей."},
+{cat:"Меню · Супы",q:"Что такое «Папа аль помодоро»?",opts:["Крем-суп из томатов с базиликом","Тосканский хлебный томатный суп с креветкой","Гаспаччо с морепродуктами","Минестроне с пастой"],ans:1,fact:"Pappa al pomodoro — тосканское крестьянское блюдо. Томаты, хлеб, оливковое масло — из этого тосканцы веками делали главное блюдо стола. Добавление креветки превращает бедную еду в ресторанную элегантность."},
+{cat:"Меню · Супы",q:"Из чего состоит черверлатто?",opts:["Шпинат, горгонзола, сливки","Крем-суп брокколи, страчателла, горгонзола","Томаты, страчателла, базилик","Тыква, имбирь, кокосовое молоко"],ans:1,fact:"Брокколи + страчателла (нежность) + горгонзола (характер). Контраст вкусов. Горгонзола острая — предупреди гостей. Хороший выбор для вегетарианцев."},
+{cat:"Меню · Паста",q:"Что НЕ входит в настоящую карбонару?",opts:["Яйцо","Пармезан","Сливки","Чёрный перец"],ans:2,fact:"Настоящая карбонара — БЕЗ СЛИВОК. Только яйцо, гуанчале (щёчный бекон), пекорино и чёрный перец. Соус образуется от тепла пасты. Если гость спрашивает про сливки — объясни с гордостью: это плюс, а не минус."},
+{cat:"Меню · Паста",q:"Какая паста подаётся с говяжьими щёчками?",opts:["Спагетти","Лингвини","Фузилли","Фузилли с щёчками и грибами"],ans:3,fact:"Фузилли с щёчками и грибами — 1400 ₸. Говяжьи щёки томятся долго, становятся шелковистыми от коллагена. Самая сытная паста в меню."},
+{cat:"Меню · Паста",q:"В чём особенность пасты казаречче?",opts:["Широкая плоская форма","Двойное скручивание — держит соус внутри","Трубчатая с рифлением","Тонкая как волос"],ans:1,fact:"Казаречче — сицилийская паста с двойным скручиванием. Внутри полая — ловит соус. В меню: с креветкой, песто и страчателлой за 1500 ₸."},
+{cat:"Меню · Пицца",q:"Какая история у пиццы Маргарита?",opts:["Придумана монахами в XIV веке","В 1889 году в честь королевы Маргариты Савойской — цвета итальянского флага","Первая пицца нью-йоркских эмигрантов в 1905 году","Рецепт с острова Искья IX века"],ans:1,fact:"1889 год. Пиццайоло Раффаэле Эспозито испёк для королевы Маргариты Савойской: красный томат + белая моцарелла + зелёный базилик = итальянский флаг. 135 лет успеха."},
+{cat:"Меню · Пицца",q:"Почему пармская ветчина кладётся на пиццу ПОСЛЕ выпечки?",opts:["Так быстрее готовить","Жар печи уничтожил бы её нежность — кладут холодной на горячую пиццу","Так требует итальянский стандарт DOC","Иначе она пересаливает тесто"],ans:1,fact:"Прошутто кладут после — холодная ветчина на горячей пицце. Четыре температуры и текстуры в одном укусе. Расскажи гостям — это знание превращает еду в историю."},
+],
+
+wine:[
+{cat:"Вино · Пары",q:"К стейку стриплойн — главная рекомендация?",opts:["Sauvignon Blanc","Gavi dei Gavi","Barolo Simposio","Le Rose Regaleali"],ans:2,fact:"Barolo — «Король вин». Мощные танины буквально «жуют» говяжий жир. Стейк за 2900 ₸ заслуживает вина с характером."},
+{cat:"Вино · Пары",q:"К карпаччо из томатов — что предложить?",opts:["Barolo","Gavi dei Gavi","Tenacity Shiraz","Bruni Asti"],ans:1,fact:"Gavi dei Gavi — деликатный белый из Пьемонта. Минеральность + кислотность не перебивают нежные томаты. Самая доступная закуска + элегантное вино = хорошее соотношение."},
+{cat:"Вино · Пары",q:"К крудо из лангустин — лучший выбор?",opts:["Barolo","Tenacity Shiraz","Chablis Sainte Claire","Bruni Asti"],ans:2,fact:"Chablis — йодистая минеральность от почв из ракушек юрского моря идеально перекликается с морепродуктами. К самой дорогой закуске — одно из лучших белых в карте."},
+{cat:"Вино · Пары",q:"К спагетти карбонара — лучшая пара?",opts:["Tenacity Shiraz","Gavi dei Gavi","Barolo","Côtes du Rhône"],ans:1,fact:"Gavi dei Gavi — кислотность режет жирность яичного соуса и бекона. Карбонара из Рима, Gavi из Пьемонта — вся Италия в одной паре."},
+{cat:"Вино · Пары",q:"К ризотто с лесными грибами?",opts:["Chablis Sainte Claire","Barolo Simposio","Bruni Prosecco","Chenin Blanc"],ans:1,fact:"Barolo из Пьемонта к пьемонтскому ризотто — региональная классика. Трюфельные ноты Бароло рифмуются с грибами. Объясни гостю — это будет ценить."},
+{cat:"Вино · Пары",q:"К рыбному супу с морепродуктами?",opts:["Barolo","Chablis Sainte Claire","Malbec","Bruni Asti"],ans:1,fact:"Chablis — минеральное бургундское вино с йодистой свежестью. Почвы Шабли из ракушек юрского моря создают «морской» характер — идеал к морепродуктам."},
+{cat:"Вино · Пары",q:"К брауни с пармезаном — что предложить?",opts:["Barolo Simposio","Bruni Asti","Tenacity Shiraz","Chablis"],ans:1,fact:"Bruni Asti к шоколадному десерту — мускатная сладость и мягкие пузырьки. Или Barolo — танинное красное к горькому шоколаду. Объясни гостю про 'flavor contrast': соль пармезана усиливает шоколад."},
+{cat:"Вино · Пары",q:"К пицце с пепперони и халапеньо?",opts:["Riesling Mosel","Bruni Asti","Tenacity Barossa Shiraz","Gavi dei Gavi"],ans:2,fact:"Австралийский Шираз к острой пицце — мощное тёмное вино с перечными нотками усиливает остроту, но и укрощает её насыщенностью."},
+{cat:"Вино · Принципы",q:"Почему к рыбным блюдам рекомендуют Chablis?",opts:["Самое дешёвое в карте","Минеральность от почв из морских ракушек","Оно французское","Высокий алкоголь усиливает вкус"],ans:1,fact:"Кимериджский известняк = дно юрского моря 100 млн лет назад. «Морская ДНК» почвы переходит в вино. Рассказывай это гостям — они запомнят."},
+{cat:"Вино · Принципы",q:"Почему к болоньезе рекомендуют Кьянти?",opts:["Оба из Тосканы — земляки","Кислотность Санджовезе схожа с кислотностью томата","Красное вино всегда к красному соусу","Просто традиция"],ans:1,fact:"Кислотность Санджовезе схожа с кислотностью томата — они не конкурируют, а дополняют. Это основной принцип гастрономических пар."},
+],
+
+story:[
+{cat:"Истории · Вина",q:"Как появился Amarone?",opts:["Имя основателя хозяйства","Монах забыл бочку — вино выбродило досуха: «Ma questo è amaro!»","Название деревни в Венето","По-итальянски «великолепное»"],ans:1,fact:"1936 год. Recioto выбродил досуха. Монах попробовал — воскликнул «Это горькое!» Amaro = горький. Так родился Amarone. Сегодня одно из самых дорогих вин Италии."},
+{cat:"Истории · Вина",q:"Почему в Chablis чувствуется морской вкус?",opts:["Добавляют морскую соль","Виноградники у Атлантики","Почвы из ракушек юрского периода — 100 млн лет назад здесь было море","Это субъективно"],ans:2,fact:"Кимериджский известняк — дно юрского моря. Ракушки аммонитов в почве. Когда пьёшь Шабли — пьёшь море. Именно поэтому Шабли + устрицы — классика."},
+{cat:"Истории · Вина",q:"За что Barolo называют «вином королей»?",opts:["Самое дорогое в Италии","В XIX веке производили исключительно для савойского двора","Король его изобрёл","Золотой цвет"],ans:1,fact:"Карл Альберт выписал французского энолога Удара, чтобы сделать Неббиоло сухим — прежде оно было сладким. Минимум 3 года выдержки по закону. Лучшие раскрываются через 15–20 лет."},
+{cat:"Истории · Вина",q:"Как Pinotage стал «найдёнышем»?",opts:["Нашли в лесу","Профессор скрестил сорта, забыл — коллега нашёл под сорняками спустя годы","Контрабанда","Происхождение неизвестно"],ans:1,fact:"1925 год. Перольд скрестил Пино Нуар и Синсо из любопытства. Ушёл с работы. Забыл. Нашли под сорняками. Единственный сорт созданный в ЮАР."},
+{cat:"Истории · Вина",q:"Чем Prosecco Extra Dry отличается от Brut?",opts:["Более сухое, чем Brut","Слаще Brut — в XIX веке нормой были сладкие вина, и это казалось «сухим»","Менее газированное","Другой сорт винограда"],ans:1,fact:"В XIX веке нормой были очень сладкие вина. То что казалось «экстра сухим» тогда — сегодня воспринимается как мягкое. Extra Dry слаще Brut. Название осталось как историческая традиция."},
+{cat:"Истории · Вина",q:"Что такое Ripasso?",opts:["Выдержка в дубовых бочках","Повторная ферментация на выжимках Amarone","Название деревни в Венето","Особый сорт"],ans:1,fact:"Ri-passo = повторный проход. Молодое Valpolicella ферментируется на выжимках Amarone — обретает его глубину и изюмность. Дороже Valpolicella, дешевле Amarone. Идеальное соотношение."},
+{cat:"Истории · Вина",q:"Откуда Gallo Nero (Чёрный Петух) на Chianti?",opts:["Герб Флоренции","Граница с Сиеной: флорентийский петух проснулся раньше — объехали больше земли","Символ виноделия","Цвет Санджовезе"],ans:1,fact:"Спор Флоренции и Сиены о границе решили по петуху: чей раньше запоёт — тот объедет больше. Флорентийский петух проснулся раньше. Gallo Nero стал символом победы и теперь на каждой бутылке Chianti Classico."},
+],
+
+lemon:[
+{cat:"Лимонады 2026",q:"Из чего состоит лимонад «Малина — Лемонграсс»?",opts:["Малина, мята, лимонный сок, газировка","Малина, лемонграсс, лимонный сок, сахарный сироп, минеральная вода","Малина, имбирь, мёд, газировка","Малина, базилик, лайм, содовая"],ans:1,fact:"Лемонграсс — тропическая трава с ароматом лимона и имбиря. Популярна в тайской кухне. Здесь встречается с малиной — получается лимонад с азиатским характером."},
+{cat:"Лимонады 2026",q:"Какой лимонад самый летний и деликатный по вкусу?",opts:["Малина — Лемонграсс","Базилик — Огурец","Черника — Ваниль","Маракуйя — Корица"],ans:1,fact:"Базилик — Огурец. Огурец в напитках — британское изобретение: в Лондоне его добавляют в джин-тоник с XIX века. Базилик добавляет итальянский акцент. Самый несладкий из всех."},
+{cat:"Лимонады 2026",q:"Что такое оржад в лимонаде «Вишня — Ореховая трава»?",opts:["Травяной настой","Миндальный сироп с цветочной водой","Вишнёвый ликёр","Кокосовое молоко"],ans:1,fact:"Оржад (orgeat) — миндальный сироп с цветочной водой. Используется в коктейле Май Тай. Вишня + оржад = Прованс в бокале. Самый взрослый из лимонадов. Рекомендуй к десертам."},
+{cat:"Лимонады 2026",q:"Почему маракуйю называют passion fruit?",opts:["Очень яркий вкус","Испанские миссионеры увидели в цветке символы Страстей Христовых","Вызывает страстное желание","Растёт в форме сердца"],ans:1,fact:"Испанские миссионеры в Южной Америке в XVII веке увидели в цветке маракуйи символы Страстей Христовых (Passio Christi). Так появилось название. Плод лианы цветёт только 24 часа."},
+{cat:"Лимонады 2026",q:"Сколько стоит каждый лимонад из новой коллекции?",opts:["290 ₸","350 ₸","390 ₸","450 ₸"],ans:2,fact:"Все 5 лимонадов — по 390 ₸, 300 мл. Малина-Лемонграсс, Базилик-Огурец, Черника-Ваниль, Маракуйя-Корица, Вишня-Ореховая трава."},
+{cat:"Лимонады 2026",q:"К какому десерту рекомендуют лимонад «Вишня — Ореховая трава»?",opts:["Тыквенный десерт","Семифредо эскимо","Брауни с пармезаном и сабайон","Сорбет"],ans:2,fact:"Вишня-Оржад к брауни с пармезаном и сабайону дыня-кумкват — миндаль оржада перекликается с ореховыми нотами шоколада. Совет для официанта: предложи пару десерт+лимонад."},
+{cat:"Лимонады 2026",q:"Что общего у всех 5 лимонадов?",opts:["Одинаковый сладкий вкус","Лимонный сок, сахарный сироп, минеральная вода — основа у всех","Все газированные на содовой","Все содержат цитрусовые"],ans:1,fact:"Основа каждого лимонада: лимонный сок + сахарный сироп + минеральная вода. Сезонная добавка создаёт характер. Все 5 — 300 мл, 390 ₸."},
+],
+
+expert_wine:[
+{cat:"Эксперт · Сомелье",q:"Гость заказал ризотто с грибами и спрашивает: «Почему Barolo, а не Chianti?»",opts:["Оба из Пьемонта — региональность, трюфельные ноты Бароло рифмуются с грибами","Кьянти слишком лёгкое для плотного ризотто","Кьянти только к мясу","Бароло дороже — значит лучше"],ans:0,hard:true,fact:"Правильный аргумент: региональное единство (оба из Пьемонта) + трюфельные ноты Неббиоло рифмуются с грибным ризотто. Кьянти тоже подойдёт, но Бароло — идеал."},
+{cat:"Эксперт · Сомелье",q:"Что лишнее? Gavi dei Gavi / Soave Classico / Barolo Simposio / Chablis Sainte Claire",opts:["Gavi — из Пьемонта, остальные из других регионов","Barolo — единственное красное, остальные три белые","Chablis — единственное французское","Soave — венецианское, остальные из Пьемонта"],ans:1,hard:true,fact:"Barolo — единственное красное вино в этом списке. Gavi, Soave и Chablis — все белые. Важно знать карту вин наизусть."},
+{cat:"Эксперт · Сомелье",q:"Гость любит красное, но заказал лосось. Что предложить?",opts:["Barolo Simposio","Pinot Noir Ried Fabian (Австрия)","Luigi Bosca Malbec","Tenacity Shiraz"],ans:1,hard:true,fact:"Австрийский Пино Нуар — деликатное красное, которое работает с рыбой. Лёгкие танины и красноягодная свежесть не перебивают лосось."},
+{cat:"Эксперт · Детали",q:"Сколько месяцев минимум выдерживается Barolo по закону?",opts:["12 месяцев","24 месяца","36 месяцев","48 месяцев"],ans:2,hard:true,fact:"Barolo — минимум 36 месяцев (из них 18 в дубе). Barolo Riserva — 62 месяца. Именно поэтому вино такое сложное и дорогое."},
+{cat:"Эксперт · Детали",q:"Из каких сортов делают Amarone?",opts:["Только Корвина","Корвина, Корвиноне, Рондинелла — подвяленные","Неббиоло и Санджовезе","Мальвазия и Треббьяно"],ans:1,hard:true,fact:"Классический купаж: Корвина (45–95%), Корвиноне и Рондинелла. Виноград подвяливается 3–4 месяца на соломенных матах — теряет воду, концентрирует сахар."},
+{cat:"Эксперт · Детали",q:"Чем Prosecco отличается от Cava по методу производства?",opts:["Только страна: Италия vs Испания","Просекко — резервуарный метод (фруктово), Кава — бутылочный (тостово)","Просекко сухое, Кава сладкая","Разные сорта: Шардоне vs Темпранильо"],ans:1,hard:true,fact:"Просекко — метод Шарма (в резервуаре): быстро, фруктово, доступно. Кава — в бутылке как Шампань: тостовые/ореховые ноты, сложнее. Gran Reserva Cava выдерживается 30+ месяцев."},
+],
+
+expert_menu:[
+{cat:"Эксперт · Меню",q:"Гость хочет самое необычное блюдо в меню. Что предложить?",opts:["Оливки Доброградские","Крудо из лангустин с leche de tigre","Карпаччо из томатов","Куриный бульон"],ans:1,hard:true,fact:"Крудо из лангустин — самое дорогое (1800 ₸) и самое необычное. Leche de tigre «готовит» морепродукты без огня. Для гостей, которые ищут впечатление."},
+{cat:"Эксперт · Меню",q:"Точная цена стейка стриплойн?",opts:["2500 ₸","2700 ₸","2900 ₸","3200 ₸"],ans:2,hard:true,fact:"Стейк стриплойн — 2900 ₸, 370 гр. Самое дорогое блюдо в меню. Обязательно уточняй прожарку: medium rare — идеально для стриплойна."},
+{cat:"Эксперт · Меню",q:"Что НЕ входит в казаречче с креветкой?",opts:["Страчателла","Соус песто","Фисташки","Пармская ветчина"],ans:3,hard:true,fact:"Казаречче с креветкой, песто и страчателлой — 1500 ₸. Паста, креветки, соус песто, сливки, страчателла, фисташки. Пармской ветчины нет."},
+{cat:"Эксперт · Меню",q:"Какой суп самый дешёвый и какой самый дорогой?",opts:["Бульон 490 ₸ и рыбный 1300 ₸","Бульон 390 ₸ и рыбный 1500 ₸","Черверлатто 950 ₸ и рыбный 1300 ₸","Все по одной цене"],ans:0,hard:true,fact:"Куриный бульон — 490 ₸ (самый дешёвый). Рыбный суп с морепродуктами — 1300 ₸ (самый дорогой). Диапазон цен на супы: 490–1300 ₸."},
+{cat:"Эксперт · Меню",q:"Чем говяжьи щёки отличаются от обычного стейка?",opts:["Это другая порода скота","Щёки — мышца которая работает всю жизнь животного: богата коллагеном, при долгом томлении становится шелковистой","Щёки дешевле потому что хуже","Это фермерский термин для лопатки"],ans:1,hard:true,fact:"Говяжьи щёки — жёсткая рабочая мышца. 8+ часов томления при низкой температуре превращают её в нежнейшее мясо. Соус густой от коллагена. 2200 ₸."},
+{cat:"Эксперт · Меню",q:"Какая пицца в меню с голубым сыром?",opts:["Маргарита","Пицца с пепперони","Пицца четыре сыра с грушей и руколой","Пицца с пармской ветчиной"],ans:2,hard:true,fact:"Пицца Четыре сыра — 1500 ₸: моцарелла, горгонзола (голубой), страчателла, пармезан + груша и руккола. Предупреди гостей чувствительных к голубым сырам."},
+],
+};
+
+QS.mix=[...QS.menu,...QS.wine,...QS.story,...QS.lemon];
+QS.hardmix=[...QS.expert_wine,...QS.expert_menu,...QS.story.map(q=>({...q,hard:true})),...QS.lemon.map(q=>({...q,hard:true}))];
+
+const TITLES={menu:"Знаток меню",wine:"Сомелье",story:"Истории вин",lemon:"Лимонады 2026",mix:"Микс",expert_wine:"Сомелье — Эксперт",expert_menu:"Меню — Эксперт",hardmix:"Хардкор"};
+const EMOJIS={menu:"🍽",wine:"🍷",story:"📖",lemon:"🍋",mix:"⚡",expert_wine:"🎯",expert_menu:"🔪",hardmix:"💀"};
+
+let st={mode:'',questions:[],idx:0,score:0,streak:0,bestStreak:0,answered:false,startTime:0,totalGames:0,totalRight:0,totalQ:0,winStreak:0,bestScore:0};
+
+function shuffle(a){return a.sort(()=>Math.random()-.5)}
+
+function startGame(mode){
+  let pool=[...QS[mode]];shuffle(pool);
+  st.questions=pool.slice(0,10);st.mode=mode;st.idx=0;st.score=0;
+  st.streak=0;st.bestStreak=0;st.answered=false;st.startTime=Date.now();
+  show('game');renderQ();
+}
+function replayGame(){startGame(st.mode)}
+
+function renderQ(){
+  const q=st.questions[st.idx],total=st.questions.length;
+  document.getElementById('qbar').style.width=Math.round(st.idx/total*100)+'%';
+  document.getElementById('qcount').textContent=(st.idx+1)+' / '+total;
+  document.getElementById('q-cat').textContent=q.cat;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('feedback').style.display='none';
+  document.getElementById('action-row').style.display='none';
+  const sr=document.getElementById('streak-row');
+  if(st.streak>=2){sr.style.display='block';document.getElementById('streak-txt').textContent='Серия '+st.streak+'! Не останавливайся';}
+  else{sr.style.display='none';}
+  const dr=document.getElementById('diff-row');
+  if(q.hard){
+    dr.style.display='block';
+    dr.innerHTML='<div class="diff-ind">🔥 Вопрос эксперта</div>';
+  } else if(st.mode==='lemon'){
+    dr.style.display='block';
+    dr.innerHTML='<div class="diff-ind new-ind">🍋 Лимонады 2026</div>';
+  } else {dr.style.display='none';}
+  const opts=document.getElementById('opts');
+  opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt';btn.textContent=o;btn.dataset.idx=i;
+    btn.onclick=()=>answer(i);opts.appendChild(btn);
+  });
+  st.answered=false;
+}
+
+function answer(chosen){
+  if(st.answered)return;st.answered=true;
+  const q=st.questions[st.idx],correct=chosen===q.ans;
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.disabled=true;
+    const bi=parseInt(b.dataset.idx);
+    if(bi===q.ans)b.classList.add('correct');
+    else if(bi===chosen&&!correct)b.classList.add('wrong');
+  });
+  if(correct){st.score++;st.streak++;st.totalRight++;if(st.streak>st.bestStreak)st.bestStreak=st.streak;}
+  else{st.streak=0;}
+  st.totalQ++;
+  const fb=document.getElementById('feedback');
+  fb.style.display='block';fb.className='feedback '+(correct?'ok':'fail');
+  fb.innerHTML='<div class="fb-title">'+(correct?'✓ Верно!':'✗ Не совсем')+'</div>'+q.fact;
+  document.getElementById('action-row').style.display='block';
+  document.getElementById('next-btn').textContent=st.idx+1<st.questions.length?'Следующий вопрос →':'Посмотреть результат →';
+}
+
+function nextQ(){
+  st.idx++;
+  if(st.idx>=st.questions.length){showResult();return;}
+  renderQ();
+}
+
+function showResult(){
+  st.totalGames++;
+  if(st.score>st.bestScore)st.bestScore=st.score;
+  if(st.score===st.questions.length)st.winStreak++;else st.winStreak=0;
+  updateStats();
+  const pct=Math.round(st.score/st.questions.length*100);
+  const elapsed=Math.round((Date.now()-st.startTime)/1000);
+  const timeStr=Math.floor(elapsed/60)>0?Math.floor(elapsed/60)+' мин '+elapsed%60+' сек':elapsed%60+' сек';
+  const isExpert=st.mode.startsWith('expert')||st.mode==='hardmix';
+  let emoji,title,sub;
+  if(pct===100){emoji='🏆';title='Идеально!';sub=isExpert?'10 из 10 на экспертном уровне. Серьёзно.':'Все 10 из 10. Ты готов работать в зале!';}
+  else if(pct>=80){emoji='🌟';title=isExpert?'Эксперт!':'Отличный результат!';sub='Почти идеал. Ещё одна игра — и всё.';}
+  else if(pct>=60){emoji='👍';title='Неплохо!';sub='Хорошая база. Повтори то, что не получилось.';}
+  else if(pct>=40){emoji='📚';title='Продолжай учиться!';sub='Играй чаще — с каждым разом лучше.';}
+  else{emoji='🍷';title='Начинающий гурман';sub='Не расстраивайся — знания приходят с практикой!';}
+  document.getElementById('res-emoji').textContent=emoji;
+  document.getElementById('res-title').textContent=title;
+  document.getElementById('res-sub').textContent=sub;
+  document.getElementById('r-score').textContent=st.score+' / '+st.questions.length;
+  document.getElementById('r-acc').textContent=pct+'%';
+  document.getElementById('r-streak').textContent=st.bestStreak;
+  document.getElementById('r-time').textContent=timeStr;
+  document.getElementById('replay-btn').textContent=EMOJIS[st.mode]+' Ещё раз';
+  saveRecord(pct,timeStr);show('result');
+}
+
+function saveRecord(pct,timeStr){
+  try{
+    const k='gv_recs';
+    const recs=JSON.parse(localStorage.getItem(k)||'[]');
+    recs.unshift({mode:TITLES[st.mode],score:st.score+'/'+st.questions.length,pct,time:timeStr,date:new Date().toLocaleDateString('ru')});
+    localStorage.setItem(k,JSON.stringify(recs.slice(0,20)));
+  }catch(e){}
+}
+
+function showLeaders(){
+  let recs=[];
+  try{recs=JSON.parse(localStorage.getItem('gv_recs')||'[]');}catch(e){}
+  const list=document.getElementById('leaders-list');
+  if(!recs.length){list.innerHTML='<div class="empty-msg">Пока нет результатов. Сыграй первую игру!</div>';}
+  else{
+    list.innerHTML=recs.map((r,i)=>`
+      <div class="leaders-row">
+        <div class="lr-num">${i+1}</div>
+        <div class="lr-info">
+          <div class="lr-mode">${r.mode}</div>
+          <div class="lr-meta">${r.date} · ${r.time}</div>
+        </div>
+        <div class="lr-score" style="color:${r.pct>=80?'#1a4a08':r.pct>=60?'#633806':'#5c1010'}">${r.score}</div>
+      </div>`).join('');
+  }
+  show('leaders');
+}
+
+function updateStats(){
+  document.getElementById('hs-total').textContent=st.totalGames;
+  document.getElementById('hs-best').textContent=st.bestScore>0?st.bestScore+'/10':'—';
+  document.getElementById('hs-streak').textContent=st.winStreak;
+  document.getElementById('hs-acc').textContent=st.totalQ>0?Math.round(st.totalRight/st.totalQ*100)+'%':'—';
+}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goHome(){show('home');updateStats();}
+</script>
+</body>
+</html>
