@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Коктейли Галереи Вкусов</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#FAF6F0;color:#333;padding:16px}
+.wrap{max-width:680px;margin:0 auto}
+h1{font-size:22px;font-weight:600;color:#1A5F1A;text-align:center;margin-bottom:4px}
+.sub{font-size:13px;color:#888;text-align:center;margin-bottom:20px}
+.nav-bar{display:flex;gap:8px;margin-bottom:16px}
+.nav-btn{flex:1;padding:10px;font-size:12px;font-weight:500;border:1px solid #C8E6C9;border-radius:10px;background:#fff;color:#888;cursor:pointer;text-align:center;text-decoration:none;display:block;transition:all .15s}
+.nav-btn:hover{background:#F1F8E9;border-color:#4CAF50;color:#2E7D32}
+.search-bar{position:relative;margin-bottom:14px}
+.search-bar input{width:100%;padding:10px 16px 10px 40px;font-size:14px;border:1px solid #C8E6C9;border-radius:10px;background:#fff;color:#333}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;color:#aaa}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.filter-btn{padding:6px 14px;font-size:13px;border:1px solid #C8E6C9;border-radius:20px;background:#fff;color:#888;cursor:pointer;transition:all .15s}
+.filter-btn:hover{background:#F1F8E9}
+.filter-btn.active{background:#2E7D32;border-color:#2E7D32;color:#fff}
+.cocktail-list{display:flex;flex-direction:column;gap:10px}
+.card{background:#fff;border:1px solid #C8E6C9;border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.card:hover{border-color:#4CAF50}
+.card.open{border-color:#4CAF50}
+.card-header{display:flex;align-items:center;gap:12px;padding:13px 15px}
+.badge{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:#E8F5E9}
+.card-meta{flex:1;min-width:0}
+.card-name{font-size:14px;font-weight:600;color:#1B5E20;line-height:1.3}
+.card-base{font-size:11px;color:#999;margin-top:2px}
+.card-vol{font-size:12px;font-weight:500;color:#888;flex-shrink:0;margin-right:8px;white-space:nowrap}
+.chev{font-size:13px;color:#bbb;transition:transform .2s;flex-shrink:0}
+.card.open .chev{transform:rotate(180deg)}
+.card-body{display:none;padding:0 15px 15px 69px}
+.card.open .card-body{display:block}
+.story-box{background:#FFF8E1;border-left:3px solid #FBC02D;border-radius:8px;padding:10px 12px;margin:10px 0 12px;font-size:12px;color:#555;line-height:1.7}
+.story-title{font-size:12px;font-weight:600;color:#E65100;margin-bottom:4px}
+.section-title{font-size:11px;font-weight:600;color:#2E7D32;letter-spacing:.05em;text-transform:uppercase;margin:10px 0 6px}
+.ing-table{width:100%;border-collapse:collapse;margin-bottom:8px}
+.ing-table th{font-size:10px;font-weight:600;color:#999;text-align:left;padding:3px 6px;border-bottom:1px solid #E8F5E9}
+.ing-table td{font-size:12px;padding:4px 6px;border-bottom:1px solid #F1F8E9;color:#444}
+.ing-table td:last-child{text-align:right;font-weight:500;color:#2E7D32;white-space:nowrap}
+.ing-table tr:last-child td{border-bottom:none}
+.ing-table tr.total-row td{font-weight:600;color:#1B5E20;background:#F1F8E9;font-size:12px}
+.prep-box{background:#F1F8E9;border-radius:8px;padding:10px 12px;font-size:12px;color:#333;line-height:1.65;margin-bottom:6px;border-left:3px solid #4CAF50}
+.garnish-box{background:#FFFDE7;border-radius:8px;padding:8px 12px;font-size:12px;color:#555;line-height:1.55;border-left:3px solid #FBC02D}
+.garnish-lbl{font-weight:600;color:#F57F17;font-size:11px;display:block;margin-bottom:2px}
+.tip-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:8px;background:#E8F5E9;color:#2E7D32;font-weight:600;margin-bottom:8px}
+.empty{text-align:center;padding:3rem;color:#bbb;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🍹 Коктейли</h1>
+<div class="sub">Нажмите на коктейль — история, состав, рецепт и подача</div>
+
+<div class="nav-bar">
+  <a class="nav-btn" href="index.html">🎮 Игра</a>
+  <a class="nav-btn" href="menu.html">🍽 Меню</a>
+  <a class="nav-btn" href="wine_list_stories.html">🍷 Вина</a>
+  <a class="nav-btn cur" href="drinks.html">🍹 Коктейли</a>
+  <a class="nav-btn" href="lemonades2026.html">🍋 Лимонады</a>
+</div>
+
+<div class="search-bar">
+  <span class="search-icon">🔍</span>
+  <input type="text" id="search" placeholder="Поиск по коктейлю или ингредиенту...">
+</div>
+<div class="filters">
+  <button class="filter-btn active" data-f="all">Все</button>
+  <button class="filter-btn" data-f="rum">Ром</button>
+  <button class="filter-btn" data-f="vodka">Водка</button>
+  <button class="filter-btn" data-f="tequila">Текила</button>
+  <button class="filter-btn" data-f="whisky">Виски</button>
+  <button class="filter-btn" data-f="gin">Джин</button>
+  <button class="filter-btn" data-f="other">Другие</button>
+</div>
+<div class="cocktail-list" id="list"></div>
+</div>
+
+<script>
+const C=[
+{
+  name:"Май Тай", emoji:"🍊", base:"rum", glass:"Рокс",
+  volume:"165 мл (с обводнением 200 мл)",
+  storyTitle:"Коктейль, который вызвал скандал на Таити",
+  story:"В 1944 году барменд Виктор Бергерон (Trader Vic) придумал этот коктейль в Окленде и угостил им двух друзей с Таити. Те выпили, вскочили и воскликнули: «Mai Tai — Roa Ae!» — что по-таитянски означает «Из этого мира — лучший!». Так появилось название. Позже другой бармен Дон Бич заявил авторство — разразился скандал, который тянулся десятилетиями. Сегодня Май Тай — официальный коктейль Гавайев.",
+  ingredients:[
+    {name:"Светлый ром", amount:"40 мл"},
+    {name:"Тёмный ром", amount:"25 мл"},
+    {name:"Трипл сек", amount:"15 мл"},
+    {name:"Сок лайма", amount:"30 мл"},
+    {name:"Сироп миндаля", amount:"15 мл"},
+    {name:"Сок ананаса", amount:"50 мл"},
+  ],
+  prep:"Всё в шейкер, страйн в рокс со льдом",
+  garnish:"Украшение — мята, подача в роксе"
+},
+{
+  name:"Космополитен", emoji:"🍸", base:"vodka", glass:"Шале (Мартини)",
+  volume:"100 мл",
+  storyTitle:"Коктейль, который прославил сериал",
+  story:"Космополитен изобрели в 1980-х в Майами, но мало кто о нём знал. Всё изменилось в 1998 году, когда героини сериала «Секс в большом городе» начали пить его каждую серию. За один сезон продажи клюквенного сока в баре Нью-Йорка выросли втрое. Говорят, создательница коктейля Шеррилин Хут так и не получила ни цента роялти от этой рекламы.",
+  ingredients:[
+    {name:"Морс клюквенный", amount:"40 мл"},
+    {name:"Водка Хаус Чайковский", amount:"30 мл"},
+    {name:"Ликёр Трипл Сек", amount:"15 мл"},
+    {name:"Сок лимона", amount:"15 мл"},
+  ],
+  prep:"Всё в шейкер, страйн в шале",
+  garnish:"Зест апельсина (на замену — лимон)"
+},
+{
+  name:"Мохито", emoji:"🌿", base:"rum", glass:"Хайбол",
+  volume:"186 мл (с обводнением 200 мл)",
+  storyTitle:"Любимый коктейль Хемингуэя",
+  story:"Мохито появился на Кубе в XVI веке — пиратские экспедиции Фрэнсиса Дрейка использовали прообраз коктейля как лекарство от цинги и дизентерии. Но настоящую славу напитку принёс Эрнест Хемингуэй, который жил в Гаване и ежедневно пил мохито в баре «Ла Бодегита дель Медио». На стене бара до сих пор висит его надпись: «Мой мохито — в Ла Бодегите». Этот бар существует и сегодня.",
+  ingredients:[
+    {name:"Ром белый Шип Мастер", amount:"50 мл"},
+    {name:"Лайм (фреш)", amount:"30 мл"},
+    {name:"Мята", amount:"6 веточек"},
+    {name:"Содовая", amount:"80 мл"},
+    {name:"Сахарный сироп", amount:"20 мл"},
+  ],
+  prep:"Мадл целый лайм в бокале, добавить всё остальное, засыпать краш-льдом",
+  garnish:"Веточка мяты, слайс лайма, подача в бокале Хайбол"
+},
+{
+  name:"Пина Колада", emoji:"🥥", base:"rum", glass:"Маргарита (шале)",
+  volume:"200 мл",
+  storyTitle:"Национальный напиток Пуэрто-Рико и причина развода",
+  story:"Пина Колада — официальный национальный напиток Пуэрто-Рико с 1978 года. Но прославилась она ещё раньше благодаря курьёзу: в 1984 году житель Нью-Йорка дал объявление в газету «Ищу девушку, которая любит пина коладу». На объявление откликнулась его собственная жена — оба не знали об увлечениях друг друга. История стала легендой, а песня «Escape (The Piña Colada Song)» попала в Billboard Hot 100.",
+  ingredients:[
+    {name:"Сок ананасовый", amount:"50 мл"},
+    {name:"Ром Шип Мастер", amount:"50 мл"},
+    {name:"Молоко кокосовое", amount:"50 мл"},
+    {name:"Взбитые сливки", amount:"по вкусу"},
+    {name:"Сироп кокос", amount:"15 мл"},
+    {name:"Вишня коктейльная", amount:"1 шт"},
+  ],
+  prep:"Всё в шейкер, страйн в бокал",
+  garnish:"Шапка взбитых сливок + коктейльная вишня"
+},
+{
+  name:"Маргарита", emoji:"🍋", base:"tequila", glass:"Маргарита",
+  volume:"105 мл",
+  storyTitle:"Коктейль, придуманный из-за аллергии",
+  story:"Существует десятки версий происхождения Маргариты. Самая красивая: в 1938 году барменд Карлос Эррера приготовил коктейль для танцовщицы Марджори Кинг, которая была аллергична на все спиртные напитки кроме текилы. Он смягчил вкус текилы лаймом и солью — и назвал напиток в её честь: Маргарита по-испански = Марджори. Сегодня Маргарита — один из самых продаваемых коктейлей в мире.",
+  ingredients:[
+    {name:"Текила Хаус Рио Гранде", amount:"50 мл"},
+    {name:"Трипл сек", amount:"25 мл"},
+    {name:"Лаймовый фреш", amount:"30 мл"},
+  ],
+  prep:"Всё в шейкер, страйн в бокал",
+  garnish:"Рем из обычной соли на ободке бокала"
+},
+{
+  name:"Апероль Шприц", emoji:"🍊", base:"other", glass:"Винный бокал",
+  volume:"200 мл",
+  storyTitle:"Коктейль, который итальянцы пьют в 18:00",
+  story:"Апероль появился в Падуе в 1919 году, но долго оставался региональным напитком Венето. Взрыв популярности произошёл только в 2003 году, когда Campari Group запустила кампанию «Spritz» — и за 10 лет продажи выросли в 40 раз. В Италии существует традиция «Aperitivo Hour» — ровно в 18:00 всё останавливается и все пьют шприц. Венецианцы считают его изобретением своих прадедов, которые разбавляли вино содовой, чтобы пить весь день.",
+  ingredients:[
+    {name:"Апероль", amount:"60 мл"},
+    {name:"Игристое Блак Си", amount:"100 мл"},
+    {name:"Содовая", amount:"30 мл"},
+    {name:"Апельсин", amount:"10 мл"},
+  ],
+  prep:"Билд в винный бокал: лёд, Апероль, игристое, сода. После пролития ставим капелю газа",
+  garnish:"Слайс апельсина"
+},
+{
+  name:"Виски Сауэр", emoji:"🥃", base:"whisky", glass:"Рокс",
+  volume:"120 мл",
+  storyTitle:"Коктейль моряков и аристократов одновременно",
+  story:"Виски Сауэр впервые упоминается в 1870 году в американском журнале. Но его прообраз — «Sour» — пили ещё британские моряки в XVIII веке: они добавляли лимонный сок в алкоголь, чтобы сохранить его в долгих плаваниях и избежать цинги. Белок в рецепте появился позже — он даёт знаменитую шелковистую пену. Профессиональный приём «сухой шейк» (сначала без льда) нужен именно для взбивания белка в устойчивую пену.",
+  ingredients:[
+    {name:"Виски Хаус", amount:"50 мл"},
+    {name:"Белок", amount:"25 мл"},
+    {name:"Сок лимона", amount:"25 мл"},
+    {name:"Сахарный сироп", amount:"20 мл"},
+    {name:"Вишня коктейльная", amount:"2 шт"},
+    {name:"Ангостура", amount:"2 даш"},
+  ],
+  prep:"Всё в шейкер, драй шейк с белком (без льда), затем со льдом, страйн в рокс",
+  garnish:"Вишня"
+},
+{
+  name:"Негрони", emoji:"🍊", base:"gin", glass:"Рокс",
+  volume:"90 мл",
+  storyTitle:"Коктейль, который граф заказал вместо содовой",
+  story:"В 1919 году флорентийский граф Камилло Негрони зашёл в бар «Кафе Кассони» и попросил бармена Форсколи усилить его Americano — заменить содовую джином. Форсколи выполнил просьбу и добавил ломтик апельсина вместо лимона. Граф так полюбил этот напиток, что заказывал его каждый день. Посетители начали просить «то, что пьёт граф Негрони» — так появилось название. Сегодня Негрони — один из символов итальянской культуры аперитива.",
+  ingredients:[
+    {name:"Джин Уитли Диев Джин", amount:"30 мл"},
+    {name:"Мартини Россо", amount:"30 мл"},
+    {name:"Кампари", amount:"30 мл"},
+  ],
+  prep:"Билд в рокс, стир (перемешать ложкой)",
+  garnish:"Цедра апельсина"
+},
+{
+  name:"Кровавая Мэри", emoji:"🍅", base:"vodka", glass:"Хайбол",
+  volume:"192 мл (с обводнением 200 мл)",
+  storyTitle:"Коктейль «для похмелья» с королевским именем",
+  story:"Кровавую Мэри придумал Фернан Пети в парижском баре «Гарри'с» около 1920 года, изначально назвав её «Bucket of Blood». Название «Кровавая Мэри» появилось позже — по одной версии, в честь королевы Марии I Тюдор, известной жестокими казнями протестантов. По другой — в честь официантки по имени Мэри из чикагского клуба. Коктейль быстро стал культовым средством от похмелья — его томатный сок восполняет электролиты, а алкоголь снимает симптомы абстиненции.",
+  ingredients:[
+    {name:"Сок томатный", amount:"100 мл"},
+    {name:"Водка Хаус Чайковский", amount:"60 мл"},
+    {name:"Сок лимона", amount:"10 мл"},
+    {name:"Табаско", amount:"4 капли"},
+    {name:"Вустершир", amount:"8 капель"},
+    {name:"Перец чёрный", amount:"1 щепотка"},
+    {name:"Соль", amount:"1 щепотка"},
+  ],
+  prep:"Всё в шейкер, страйн в хайбол",
+  garnish:"Палочка сельдерея или лимон"
+},
+{
+  name:"Дайкири", emoji:"🍋", base:"rum", glass:"Шале (Мартини)",
+  volume:"120 мл",
+  storyTitle:"Коктейль американских инженеров и Джона Кеннеди",
+  story:"Дайкири придумали в 1898 году американские инженеры на шахтах Кубы — они смешали местный ром с лаймом и сахаром, чтобы сделать воду безопаснее для питья. Название дали в честь пляжа Дайкири рядом с Сантьяго. В XX веке напиток обрёл поклонников среди сильных мира сего: Хемингуэй пил его без сахара (диабет), а президент США Джон Кеннеди считал Дайкири своим любимым коктейлем и требовал его на официальных приёмах.",
+  ingredients:[
+    {name:"Ром Шип Мастер", amount:"60 мл"},
+    {name:"Фреш лаймовый", amount:"25 мл"},
+    {name:"Сахарный сироп", amount:"25 мл"},
+    {name:"Лайм", amount:"10 мл"},
+  ],
+  prep:"Всё в шейкер, страйн в шале",
+  garnish:"Цедра лайма"
+},
+{
+  name:"Лонг Айленд", emoji:"🍹", base:"vodka", glass:"Хайбол",
+  volume:"195 мл",
+  storyTitle:"Самый «нечестный» коктейль в мире",
+  story:"Лонг Айленд Айс Ти — один из самых коварных коктейлей: выглядит как безобидный холодный чай, но содержит пять видов крепкого алкоголя. Придумали его в 1972 году на острове Лонг-Айленд (штат Нью-Йорк) во время «сухого закона» в округе — бармен Роберт Баттс замаскировал алкоголь под чай для проверяющих. По другой версии, рецепт появился в Теннесси в 1940-х. Сегодня это один из самых популярных коктейлей в мире — и один из самых крепких среди «коктейльных классиков».",
+  ingredients:[
+    {name:"Водка Чайковский", amount:"15 мл"},
+    {name:"Текила Хаус Рио Гранде", amount:"15 мл"},
+    {name:"Ром Шип Мастер", amount:"15 мл"},
+    {name:"Джин Диев Джин Уитли", amount:"15 мл"},
+    {name:"Ликёр Трипл Сек", amount:"15 мл"},
+    {name:"Сироп лайм", amount:"15 мл"},
+    {name:"Кола", amount:"по вкусу"},
+  ],
+  prep:"Всё (кроме колы) в шейкер, страйн в хайбол со льдом, долить колой",
+  garnish:"Украшение лимон, подача хайбол"
+},
+];
+
+const BASE_LABEL={rum:"Ром",vodka:"Водка",tequila:"Текила",whisky:"Виски",gin:"Джин",other:"Другое"};
+let filter="all", search="";
+
+function render(){
+  const list=document.getElementById("list");
+  const q=search.toLowerCase();
+  const filtered=C.filter(c=>{
+    const mf=filter==="all"||c.base===filter;
+    const ms=!q||c.name.toLowerCase().includes(q)||c.ingredients.some(i=>i.name.toLowerCase().includes(q))||c.story.toLowerCase().includes(q);
+    return mf&&ms;
+  });
+  if(!filtered.length){list.innerHTML='<div class="empty">Ничего не найдено</div>';return;}
+  list.innerHTML=filtered.map((c,i)=>`
+    <div class="card" id="cc${i}">
+      <div class="card-header" onclick="tog(${i})">
+        <div class="badge">${c.emoji}</div>
+        <div class="card-meta">
+          <div class="card-name">${c.name}</div>
+          <div class="card-base">${BASE_LABEL[c.base]} · ${c.glass}</div>
+        </div>
+        <div class="card-vol">${c.volume}</div>
+        <span class="chev">▾</span>
+      </div>
+      <div class="card-body">
+        <span class="tip-tag">${BASE_LABEL[c.base]}</span>
+        <div class="story-box">
+          <div class="story-title">📖 ${c.storyTitle}</div>
+          ${c.story}
+        </div>
+        <div class="section-title">Состав</div>
+        <table class="ing-table">
+          <tr><th>Ингредиент</th><th>Кол-во</th></tr>
+          ${c.ingredients.map(i=>`<tr><td>${i.name}</td><td>${i.amount}</td></tr>`).join("")}
+          <tr class="total-row"><td>Выход</td><td>${c.volume}</td></tr>
+        </table>
+        <div class="section-title">Приготовление</div>
+        <div class="prep-box">🍸 ${c.prep}</div>
+        <div class="section-title">Гарниш и подача</div>
+        <div class="garnish-box"><span class="garnish-lbl">🌿 Гарниш</span>${c.garnish}</div>
+      </div>
+    </div>`).join("");
+}
+
+function tog(i){document.getElementById("cc"+i).classList.toggle("open")}
+
+document.querySelectorAll(".filter-btn").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll(".filter-btn").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    filter=b.dataset.f;
+    render();
+  });
+});
+
+document.getElementById("search").addEventListener("input",e=>{
+  search=e.target.value;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
